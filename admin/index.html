@@ -1,0 +1,163 @@
+---
+layout: default
+title: Portal Barbería
+---
+
+<!-- =========================================================================
+     1. VISTA DE INICIO DE SESIÓN (LOGIN VIEW)
+     ========================================================================= -->
+<div id="admin-login-view" class="app-view">
+  
+  <header class="brand-header">
+    <span class="brand-logo">Portal Staff</span>
+    <i data-lucide="lock" style="stroke:var(--primary); width:20px; height:20px;"></i>
+  </header>
+
+  <div class="card-glass">
+    <h3 style="margin-bottom: 8px;">Inicia Sesión</h3>
+    <p class="service-meta" style="margin-bottom: 20px;">Accede como administrador o barbero para gestionar turnos.</p>
+    
+    <form id="admin-login-form">
+      <div class="form-group">
+        <label class="form-label" for="admin-email">Correo Electrónico</label>
+        <input class="form-control" type="email" id="admin-email" required placeholder="ejemplo@barberia.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="admin-password">Contraseña</label>
+        <input class="form-control" type="password" id="admin-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+        Ingresar <i data-lucide="log-in"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- =========================================================================
+     2. VISTA DE PANEL DE CONTROL GENERAL (DASHBOARD VIEW)
+     ========================================================================= -->
+<div id="admin-dashboard-view" class="app-view" style="display:none;">
+  
+  <!-- Encabezado del Dashboard con saludo y Cierre de Sesión -->
+  <div class="admin-header">
+    <div>
+      <h2 id="user-greeting" style="font-size:1.3rem;">Cargando...</h2>
+      <span id="user-role-tag" class="appointment-status-tag" style="margin-top:4px; display:inline-block;">Rol</span>
+    </div>
+    <div class="logout-icon" id="btn-logout" title="Cerrar Sesión">
+      <i data-lucide="log-out" style="width:24px; height:24px;"></i>
+    </div>
+  </div>
+
+  <!-- Barra de pestañas (solo visible para Super Admin) -->
+  <div class="admin-tab-bar" id="admin-tab-container" style="display:none;">
+    <button class="admin-tab-btn active" data-tab="tab-appointments">Citas del Día</button>
+    <button class="admin-tab-btn" data-tab="tab-services">Servicios</button>
+  </div>
+
+  <!-- ==========================================
+       SUBPANE 1: CONTROL DE CITAS (Admin & Barbero)
+       ========================================== -->
+  <div class="admin-subpane active" id="tab-appointments">
+    
+    <!-- Filtro de Fecha para las citas -->
+    <div class="card" style="padding:15px; margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <label class="form-label" for="date-filter" style="margin-bottom:0; font-weight:600;">Ver turnos del día:</label>
+        <input class="form-control" type="date" id="date-filter" style="max-width:180px; padding:8px 12px; font-size:0.9rem;">
+      </div>
+    </div>
+
+    <!-- Indicadores / Stats del Día -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Citas</span>
+        <div class="stat-val" id="stat-appointments-count">0</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Ganado (Cobrado)</span>
+        <div class="stat-val" id="stat-earnings">$0.00</div>
+      </div>
+    </div>
+
+    <!-- Listado Dinámico de Citas -->
+    <h3 style="margin-bottom: 12px;">Agenda</h3>
+    <div id="list-appointments">
+      <!-- Inyectado dinámicamente -->
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SUBPANE 2: CONTROL DE SERVICIOS (Solo Super Admin)
+       ========================================== -->
+  <div class="admin-subpane" id="tab-services">
+    
+    <!-- Formulario Crear Nuevo Servicio -->
+    <div class="card-glass" style="margin-bottom:20px;">
+      <h3 style="margin-bottom:12px;">Nuevo Servicio</h3>
+      <form id="form-manage-service">
+        <div class="form-group">
+          <label class="form-label" for="service-name">Nombre del Servicio *</label>
+          <input class="form-control" type="text" id="service-name" required placeholder="Ej: Corte Degradado">
+        </div>
+        <div style="display:flex; gap:12px; margin-bottom:12px;">
+          <div class="form-group" style="flex:1; margin-bottom:0;">
+            <label class="form-label" for="service-price">Precio ($) *</label>
+            <input class="form-control" type="number" step="0.01" id="service-price" required placeholder="15.00">
+          </div>
+          <div class="form-group" style="flex:1; margin-bottom:0;">
+            <label class="form-label" for="service-duration">Duración (min) *</label>
+            <input class="form-control" type="number" id="service-duration" required placeholder="30">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="service-desc">Descripción (Opcional)</label>
+          <input class="form-control" type="text" id="service-desc" placeholder="Detalle rápido del servicio">
+        </div>
+        <button type="submit" class="btn btn-primary btn-small">Crear Servicio</button>
+      </form>
+    </div>
+
+    <!-- Lista de Servicios actuales (con botón de desactivar) -->
+    <h3 style="margin-bottom: 12px;">Servicios Registrados</h3>
+    <div class="services-list" id="list-admin-services">
+      <!-- Inyectado dinámicamente -->
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODO BARBERO: EDICIÓN DE PERFIL (Solo Barbero)
+       ========================================== -->
+  <div id="panel-barber" style="display:none; margin-top:20px;">
+    <div class="card-glass">
+      <h3 style="margin-bottom:12px;">Mi Perfil Público</h3>
+      <p class="service-meta" style="margin-bottom:16px;">Mantén actualizada tu información para los clientes.</p>
+      
+      <form id="form-barber-profile">
+        <div class="form-group">
+          <label class="form-label" for="edit-photo">URL Foto de Perfil</label>
+          <input class="form-control" type="url" id="edit-photo" placeholder="https://unsplash.com/... (link directo)">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-bio">Biografía / Presentación</label>
+          <textarea class="form-control" id="edit-bio" rows="3" placeholder="Escribe un poco sobre tu trayectoria y estilo..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-specialties">Especialidades (separadas por comas)</label>
+          <input class="form-control" type="text" id="edit-specialties" placeholder="Corte Clásico, Barba, Tintura, etc.">
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Placeholder para indicar controles de administrador general adicionales si se requiere -->
+  <div id="panel-superadmin" style="display:none;">
+    <!-- Controles exclusivos globales adicionales si se programaran más adelante -->
+  </div>
+
+</div>
+
+<!-- Inyección de Lógica -->
+<script src="{{ '/assets/js/supabase-client.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/admin.js' | relative_url }}"></script>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title }} | {{ site.title }}</title>
+  
+  <!-- SEO Tags -->
+  {% seo %}
+
+  <!-- Google Fonts - Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
+  
+  <!-- Supabase JS Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Lucide Icons for premium modern look -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <!-- App Container (Centrado tipo móvil en escritorio, full-screen en celular) -->
+  <div class="app-frame">
+    
+    <!-- Contenido dinámico de la página -->
+    <main class="app-content">
+      {{ content }}
+    </main>
+
+    <!-- Barra de navegación inferior -->
+    {% include bottom_nav.html %}
+
+  </div>
+
+  <!-- Inicialización de iconos de Lucide -->
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

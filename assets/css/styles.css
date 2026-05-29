@@ -1,0 +1,688 @@
+/* =========================================================================
+   BARBERÍA ELEGANCE - SISTEMA DE DISEÑO GLOBAL (VANILLA CSS)
+   ========================================================================= */
+
+/* --- Variables de Diseño --- */
+:root {
+  --font-family: 'Outfit', sans-serif;
+  
+  /* Paleta de Colores (Oscura & Dorada Premium) */
+  --bg-main: #0a0a0b;
+  --bg-surface: #131316;
+  --bg-surface-elevated: #1c1c22;
+  --glass-bg: rgba(19, 19, 22, 0.75);
+  --glass-border: rgba(212, 175, 55, 0.15);
+  
+  --primary: #d4af37; /* Dorado */
+  --primary-hover: #f3cf58;
+  --primary-glow: rgba(212, 175, 55, 0.3);
+  
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  
+  /* Espaciado & Bordes */
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* --- Reseteo Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: #030303;
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* --- Marco de Aplicación (Desktop Wrapper) --- */
+.app-frame {
+  width: 100%;
+  height: 100vh;
+  background-color: var(--bg-main);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Simulación de dispositivo móvil en pantallas de escritorio */
+@media (min-width: 480px) {
+  body {
+    background: radial-gradient(circle at top left, #2c1a04 0%, #030303 70%);
+  }
+  
+  .app-frame {
+    max-width: 420px;
+    height: 880px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+                0 0 0 12px #1e1e1e, /* Borde físico del teléfono */
+                0 0 30px 5px var(--primary-glow);
+    border: 4px solid #2d2d2d;
+  }
+}
+
+/* --- Contenido Principal --- */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px calc(80px + var(--safe-area-bottom)) 20px;
+  scroll-behavior: smooth;
+}
+
+/* Ocultar barra de scroll para una apariencia más limpia */
+.app-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Barra de Navegación Inferior (Bottom Nav) --- */
+.bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(65px + var(--safe-area-bottom));
+  background: rgba(19, 19, 22, 0.85);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: var(--safe-area-bottom);
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: var(--transition-smooth);
+  flex: 1;
+  padding: 8px 0;
+  gap: 4px;
+}
+
+.nav-item:hover, .nav-item.active {
+  color: var(--primary);
+  text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  transition: var(--transition-smooth);
+}
+
+.nav-item.active .nav-icon {
+  transform: translateY(-2px) scale(1.1);
+  stroke-width: 2.5px;
+}
+
+/* --- Secciones y Vistas --- */
+.app-view {
+  display: none;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.app-view.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Componentes Visuales Premium --- */
+
+/* Encabezados */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.brand-logo {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Tarjetas */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: var(--transition-smooth);
+}
+
+.card-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.1);
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #000;
+  border: none;
+  box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-danger {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+  background-color: var(--danger);
+  color: #fff;
+}
+
+/* Formularios */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  transition: var(--transition-smooth);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* --- Diseños del Cliente (Booking Wizard) --- */
+
+/* Héroe de la Barbería */
+.hero-section {
+  text-align: center;
+  padding: 30px 10px;
+  margin-bottom: 24px;
+}
+
+.hero-subtitle {
+  color: var(--primary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+.hero-title {
+  font-size: 2.2rem;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.hero-desc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* Lista de Servicios y Barberos */
+.services-list, .barbers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-item, .barber-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.service-item.selected, .barber-item.selected {
+  border-color: var(--primary);
+  background: rgba(212, 175, 55, 0.05);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+.service-info, .barber-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.service-name, .barber-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.service-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.service-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* Barberos con Avatar */
+.barber-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.barber-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  background-color: var(--bg-surface-elevated);
+}
+
+/* Wizard Pasos */
+.wizard-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.wizard-steps::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background-color: var(--bg-surface-elevated);
+  z-index: 1;
+}
+
+.step-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--bg-surface-elevated);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  z-index: 2;
+  transition: var(--transition-smooth);
+}
+
+.step-indicator.active {
+  background-color: var(--bg-main);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.step-indicator.completed {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: #000;
+}
+
+.step-pane {
+  display: none;
+}
+
+.step-pane.active {
+  display: block;
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Calendario Táctil */
+.date-selector-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  scroll-snap-type: x mandatory;
+}
+
+.date-selector-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.date-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 75px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  scroll-snap-align: start;
+}
+
+.date-bubble.selected {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #000;
+}
+
+.date-bubble-dayname {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.date-bubble.selected .date-bubble-dayname {
+  opacity: 0.9;
+}
+
+.date-bubble-day {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Grid de Horas */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.time-bubble {
+  padding: 12px;
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: var(--transition-smooth);
+}
+
+.time-bubble.selected {
+  background-color: var(--primary);
+  color: #000;
+  border-color: var(--primary);
+}
+
+.time-bubble.disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.02);
+}
+
+/* --- Panel de Administración (Dashboards) --- */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logout-icon {
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition-smooth);
+}
+
+.logout-icon:hover {
+  color: var(--danger);
+}
+
+/* Indicadores / Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.stat-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 4px;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Citas Listado */
+.appointment-list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--bg-surface);
+  border-radius: var(--border-radius-md);
+  border-left: 4px solid var(--primary);
+  margin-bottom: 12px;
+}
+
+.appointment-list-item.completed {
+  border-left-color: var(--success);
+}
+
+.appointment-list-item.cancelled {
+  border-left-color: var(--danger);
+  opacity: 0.6;
+}
+
+.appointment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.appointment-time-tag {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.appointment-status-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.status-scheduled {
+  background-color: rgba(212, 175, 55, 0.15);
+  color: var(--primary);
+}
+
+.status-completed {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+
+.status-cancelled {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
+.appointment-details {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Gestión de Barberos / Servicios */
+.admin-tab-bar {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+}
+
+.admin-tab-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.admin-tab-btn.active {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+
+.admin-subpane {
+  display: none;
+}
+
+.admin-subpane.active {
+  display: block;
+}

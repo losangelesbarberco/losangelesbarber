@@ -1,0 +1,175 @@
+---
+layout: default
+title: Inicio & Reservas
+---
+
+<!-- =========================================================================
+     VISTA DE INICIO (HOME VIEW)
+     ========================================================================= -->
+<div id="home-view" class="app-view active">
+  
+  <!-- Encabezado de Marca -->
+  <header class="brand-header">
+    <span class="brand-logo">Elegance</span>
+    <i data-lucide="scissors" style="stroke:var(--primary); width:20px; height:20px;"></i>
+  </header>
+
+  <!-- Imagen Héroe / Presentación -->
+  <div class="hero-section">
+    <span class="hero-subtitle">Corte & Estilo Premium</span>
+    <h1 class="hero-title">Refina Tu Estilo Diario</h1>
+    <p class="hero-desc">Agenda tu turno en segundos con barberos profesionales altamente calificados.</p>
+  </div>
+
+  <!-- Imagen Ilustrativa Premium -->
+  <div style="width: 100%; height: 180px; border-radius: var(--border-radius-md); overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05);">
+    <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600&auto=format&fit=crop&q=80" alt="Barbershop" style="width:100%; height:100%; object-fit:cover;">
+  </div>
+
+  <!-- Información de la Barbería -->
+  <div class="card-glass">
+    <h3 style="margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="map-pin" style="stroke:var(--primary); width:18px; height:18px;"></i> Ubicación
+    </h3>
+    <p class="service-meta" style="margin-bottom: 16px;">Av. Principal 123, Centro de la Ciudad</p>
+    
+    <h3 style="margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="clock" style="stroke:var(--primary); width:18px; height:18px;"></i> Horarios
+    </h3>
+    <p class="service-meta" style="margin-bottom: 4px;"><strong>Lunes a Sábado:</strong> 9:00 AM - 7:00 PM</p>
+    <p class="service-meta"><strong>Domingos:</strong> Cerrado</p>
+  </div>
+
+  <!-- Botón de Llamada a la Acción -->
+  <button id="btn-start-booking" class="btn btn-primary" onclick="document.getElementById('nav-booking').click();">
+    <i data-lucide="calendar"></i> Reservar un Turno
+  </button>
+</div>
+
+<!-- =========================================================================
+     VISTA DE RESERVAS (BOOKING WIZARD VIEW)
+     ========================================================================= -->
+<div id="booking-view" class="app-view">
+  
+  <header class="brand-header">
+    <span class="brand-logo">Nueva Cita</span>
+    <i data-lucide="calendar-plus" style="stroke:var(--primary); width:20px; height:20px;"></i>
+  </header>
+
+  <!-- Indicador de Pasos del Wizard -->
+  <div class="wizard-steps">
+    <div class="step-indicator active" id="step-1">1</div>
+    <div class="step-indicator" id="step-2">2</div>
+    <div class="step-indicator" id="step-3">3</div>
+    <div class="step-indicator" id="step-4">4</div>
+    <div class="step-indicator" id="step-5">5</div>
+  </div>
+
+  <!-- PASO 1: Selección de Servicio -->
+  <div class="step-pane active" id="pane-service">
+    <h3 style="margin-bottom: 8px;">Selecciona un Servicio</h3>
+    <p class="service-meta" style="margin-bottom: 20px;">Elige el servicio que deseas realizarte.</p>
+    
+    <div class="services-list" id="services-container">
+      <!-- Inyectado dinámicamente por JS -->
+    </div>
+    
+    <div style="margin-top: 24px;">
+      <button class="btn btn-primary" id="btn-to-step2" disabled>
+        Continuar <i data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- PASO 2: Selección de Barbero -->
+  <div class="step-pane" id="pane-barber">
+    <h3 style="margin-bottom: 8px;">Selecciona tu Barbero</h3>
+    <p class="service-meta" style="margin-bottom: 20px;">Elige a tu profesional preferido.</p>
+    
+    <div class="barbers-list" id="barbers-container">
+      <!-- Inyectado dinámicamente por JS -->
+    </div>
+
+    <div style="margin-top: 24px; display:flex; gap:12px;">
+      <button class="btn" id="btn-back-to-step1">
+        <i data-lucide="arrow-left"></i> Atrás
+      </button>
+      <button class="btn btn-primary" id="btn-to-step3" disabled>
+        Continuar <i data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- PASO 3: Selección de Fecha y Hora -->
+  <div class="step-pane" id="pane-time">
+    <h3 style="margin-bottom: 8px;">Selecciona Fecha y Hora</h3>
+    <p class="service-meta" style="margin-bottom: 20px;">Elige un horario disponible.</p>
+
+    <!-- Selector de Fechas (Horizontal Scroll) -->
+    <div class="date-selector-scroll" id="date-scroll-container">
+      <!-- Inyectado dinámicamente por JS -->
+    </div>
+
+    <!-- Grid de Horas Disponibles -->
+    <div class="time-grid" id="time-grid-container">
+      <!-- Inyectado dinámicamente por JS -->
+    </div>
+
+    <div style="margin-top: 24px; display:flex; gap:12px;">
+      <button class="btn" id="btn-back-to-step2">
+        <i data-lucide="arrow-left"></i> Atrás
+      </button>
+      <button class="btn btn-primary" id="btn-to-step4" disabled>
+        Continuar <i data-lucide="arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- PASO 4: Ingreso de Datos del Cliente -->
+  <div class="step-pane" id="pane-details">
+    <h3 style="margin-bottom: 8px;">Tus Datos de Contacto</h3>
+    <p class="service-meta" style="margin-bottom: 16px;">Completa tu información para agendar la cita.</p>
+
+    <!-- Resumen de Cita -->
+    <div id="summary-details" style="margin-bottom: 20px;"></div>
+
+    <form id="booking-client-form">
+      <div class="form-group">
+        <label class="form-label" for="client-name">Nombre y Apellido *</label>
+        <input class="form-control" type="text" id="client-name" required placeholder="Ej: Juan Pérez">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="client-phone">Número de Celular *</label>
+        <input class="form-control" type="tel" id="client-phone" required placeholder="Ej: 1122334455">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="client-email">Correo Electrónico (Opcional)</label>
+        <input class="form-control" type="email" id="client-email" placeholder="Ej: juan@ejemplo.com">
+      </div>
+
+      <div style="margin-top: 24px; display:flex; gap:12px;">
+        <button type="button" class="btn" id="btn-back-to-step3">
+          <i data-lucide="arrow-left"></i> Atrás
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Confirmar Reserva <i data-lucide="check"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- PASO 5: Confirmación Final -->
+  <div class="step-pane" id="pane-confirm">
+    <div id="confirmation-details"></div>
+    <div style="margin-top: 24px;">
+      <button class="btn btn-primary" id="btn-reset-booking">
+        <i data-lucide="home"></i> Volver al Inicio
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Inyección de Lógica -->
+<script src="{{ '/assets/js/supabase-client.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/booking.js' | relative_url }}"></script>
