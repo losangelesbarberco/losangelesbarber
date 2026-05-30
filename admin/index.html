@@ -167,6 +167,17 @@ title: Portal Barbería
       <h3 style="margin-bottom:12px;">Textos del Home</h3>
       <form id="form-manage-home">
         <div class="form-group">
+          <label class="form-label">Logotipo de la Barbería</label>
+          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+            <div id="logo-preview-container" style="width: 60px; height: 60px; border-radius: 8px; background: var(--bg-surface-elevated); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <span class="text-muted" style="font-size: 0.7rem;" id="logo-preview-text">Sin Logo</span>
+              <img id="logo-preview-img" src="" style="display: none; width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <input class="form-control" type="file" id="set-logo_file" accept="image/png, image/jpeg, image/webp" style="flex: 1;">
+          </div>
+          <p class="service-meta" style="margin-top: 4px; font-size: 0.8rem;">Sube una imagen para reemplazar el texto principal de tu marca (Elegance).</p>
+        </div>
+        <div class="form-group">
           <label class="form-label">Subtítulo Hero</label>
           <input class="form-control" type="text" id="set-hero_subtitle" placeholder="Corte & Estilo Premium">
         </div>

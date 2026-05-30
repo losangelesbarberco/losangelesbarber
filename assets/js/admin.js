@@ -603,8 +603,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) throw error;
       if (settings) {
         settings.forEach(setting => {
-          const el = document.getElementById(`set-${setting.id}`);
-          if (el) el.value = setting.value;
+          if (setting.id === 'logo_url' && setting.value.trim() !== '') {
+            const previewImg = document.getElementById("logo-preview-img");
+            const previewText = document.getElementById("logo-preview-text");
+            if (previewImg && previewText) {
+              previewImg.src = setting.value;
+              previewImg.style.display = "block";
+              previewText.style.display = "none";
+            }
+          } else {
+            const el = document.getElementById(`set-${setting.id}`);
+            if (el) el.value = setting.value;
+          }
         });
       }
     } catch (err) {
@@ -619,15 +629,55 @@ document.addEventListener("DOMContentLoaded", () => {
       btnSubmit.setAttribute("disabled", "true");
       btnSubmit.innerText = "Guardando...";
 
-      const ids = ['hero_subtitle', 'hero_title', 'hero_desc', 'info_address', 'info_hours_wk', 'info_hours_we'];
-      const updates = ids.map(id => {
-        return { id: id, value: document.getElementById(`set-${id}`).value.trim() };
-      });
+      const fileInput = document.getElementById("set-logo_file");
+      let logoUrl = null;
 
       try {
+        // Si el usuario seleccionó una imagen nueva, la subimos primero
+        if (fileInput && fileInput.files.length > 0) {
+          btnSubmit.innerText = "Subiendo imagen...";
+          const file = fileInput.files[0];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `logo_${Date.now()}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('logos')
+            .upload(fileName, file, { cacheControl: '3600', upsert: true });
+            
+          if (uploadError) throw new Error("Error subiendo imagen a la nube: " + uploadError.message);
+          
+          // Obtener el enlace público de la imagen recién subida
+          const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+          logoUrl = urlData.publicUrl;
+        }
+
+        const ids = ['hero_subtitle', 'hero_title', 'hero_desc', 'info_address', 'info_hours_wk', 'info_hours_we'];
+        const updates = ids.map(id => {
+          return { id: id, value: document.getElementById(`set-${id}`).value.trim() };
+        });
+        
+        // Añadir el logo_url solo si subimos uno nuevo
+        if (logoUrl) {
+          updates.push({ id: "logo_url", value: logoUrl });
+        }
+
+        btnSubmit.innerText = "Guardando configuración...";
         const { error } = await supabase.from("settings").upsert(updates);
         if (error) throw error;
-        alert("Textos de inicio guardados correctamente.");
+        
+        alert("Textos e imagen guardados correctamente.");
+        
+        // Actualizar la previsualización
+        if (logoUrl) {
+           const previewImg = document.getElementById("logo-preview-img");
+           const previewText = document.getElementById("logo-preview-text");
+           if (previewImg && previewText) {
+             previewImg.src = logoUrl;
+             previewImg.style.display = "block";
+             previewText.style.display = "none";
+           }
+           fileInput.value = ""; // limpiar input
+        }
       } catch (err) {
         alert("Error guardando configuración: " + err.message);
       } finally {
