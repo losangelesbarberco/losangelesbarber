@@ -768,10 +768,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // --- Lógica de GPS ---
     const btnGetGps = document.getElementById("btn-get-gps");
+    console.log("GPS Button found:", btnGetGps);
     if (btnGetGps) {
-      btnGetGps.addEventListener("click", () => {
+      btnGetGps.addEventListener("click", (e) => {
+        e.preventDefault();
+        alert("Botón GPS clickeado");
+        
         if (!navigator.geolocation) {
-          alert("Tu navegador no soporta geolocalización.");
+          alert("Tu navegador no soporta geolocalización o necesitas usar HTTPS.");
           return;
         }
         
