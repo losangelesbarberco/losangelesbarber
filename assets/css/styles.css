@@ -43,19 +43,18 @@
 
 body {
   font-family: var(--font-family);
-  background-color: #030303;
+  background-color: var(--bg-main);
   color: var(--text-primary);
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  margin: 0;
+  /* Eliminar centrado flexbox para evitar que se desborde en móviles */
 }
 
 /* --- Marco de Aplicación (Desktop Wrapper) --- */
 .app-frame {
   width: 100%;
   height: 100vh;
+  height: 100dvh; /* dvh se adapta dinámicamente a la barra del navegador móvil */
   background-color: var(--bg-main);
   position: relative;
   display: flex;
