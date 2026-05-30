@@ -54,6 +54,7 @@ title: Portal Barbería
     <button class="admin-tab-btn active" data-tab="tab-appointments">Citas del Día</button>
     <button class="admin-tab-btn" data-tab="tab-services">Servicios</button>
     <button class="admin-tab-btn" data-tab="tab-barbers">Barberos</button>
+    <button class="admin-tab-btn" data-tab="tab-gallery">Galería</button>
     <button class="admin-tab-btn" data-tab="tab-homeconfig">Inicio</button>
   </div>
 
@@ -168,6 +169,33 @@ title: Portal Barbería
     <h3 style="margin-bottom: 12px;">Barberos Registrados</h3>
     <div class="barbers-list" id="list-admin-barbers">
       <!-- Inyectado dinámicamente -->
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SUBPANE: GALERÍA (Solo Super Admin)
+       ========================================== -->
+  <div class="admin-subpane" id="tab-gallery" style="display:none;">
+    <div class="card-glass" style="margin-bottom:20px;">
+      <h3 style="margin-bottom: 12px;">Gestión de Galería</h3>
+      <p class="service-meta" style="margin-bottom: 24px;">Sube o elimina fotos de la galería pública.</p>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <h4 style="margin-bottom: 16px; font-size: 1.1rem; color: var(--primary);">Subir Nueva Foto</h4>
+        <form id="form-manage-gallery" style="display:flex; flex-direction:column; gap:12px;">
+          <input class="form-control" type="file" id="gallery-photo-file" accept="image/*" required>
+          <button type="submit" class="btn btn-primary" id="btn-upload-gallery">
+            <i data-lucide="upload-cloud" style="width:16px; height:16px;"></i> Subir a la Galería
+          </button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h4 style="margin-bottom: 16px; font-size: 1.1rem; color: var(--primary);">Fotos Publicadas</h4>
+        <div id="list-admin-gallery" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:12px;">
+          <p class="text-muted">Cargando galería...</p>
+        </div>
+      </div>
     </div>
   </div>
 

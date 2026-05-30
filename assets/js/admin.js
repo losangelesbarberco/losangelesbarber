@@ -64,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadAdminServices();
       } else if (targetId === "tab-barbers") {
         loadAdminBarbers();
+      } else if (targetId === "tab-gallery") {
+        loadAdminGallery();
       } else if (targetId === "tab-homeconfig") {
         loadAdminHomeConfig();
       }
@@ -734,6 +736,106 @@ document.addEventListener("DOMContentLoaded", () => {
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = barberId ? "Actualizar Barbero" : "Crear Barbero";
+      }
+    });
+  }
+
+  // --- 8.5 Gestión de Galería (Solo Super Admin) ---
+  const formManageGallery = document.getElementById("form-manage-gallery");
+  const listAdminGallery = document.getElementById("list-admin-gallery");
+  let galleryArray = [];
+
+  async function loadAdminGallery() {
+    if (!listAdminGallery) return;
+    try {
+      const { data, error } = await supabase.from("settings").select("value").eq("id", "gallery_images").single();
+      if (error && error.code !== "PGRST116") throw error; // PGRST116 is not found (empty)
+      
+      galleryArray = data && data.value ? JSON.parse(data.value) : [];
+      
+      listAdminGallery.innerHTML = "";
+      if (galleryArray.length === 0) {
+        listAdminGallery.innerHTML = "<p class='text-muted' style='grid-column:1/-1;'>No hay fotos en la galería.</p>";
+        return;
+      }
+      
+      galleryArray.forEach((url, index) => {
+        const item = document.createElement("div");
+        item.style.position = "relative";
+        item.style.borderRadius = "8px";
+        item.style.overflow = "hidden";
+        item.style.border = "1px solid rgba(255,255,255,0.1)";
+        item.innerHTML = `
+          <img src="${url}" style="width:100%; height:120px; object-fit:cover; display:block;">
+          <button class="btn-delete-gallery" data-index="${index}" style="position:absolute; top:4px; right:4px; background:var(--danger); border:none; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:white;">
+            <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+          </button>
+        `;
+        listAdminGallery.appendChild(item);
+      });
+      
+      document.querySelectorAll(".btn-delete-gallery").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          if (!confirm("¿Eliminar esta foto de la galería pública?")) return;
+          const idx = e.currentTarget.dataset.index;
+          galleryArray.splice(idx, 1);
+          await saveGallerySettings();
+        });
+      });
+      
+      if (window.lucide) window.lucide.createIcons();
+    } catch (err) {
+      console.error("Error cargando galería:", err.message);
+    }
+  }
+
+  async function saveGallerySettings() {
+    try {
+      const { error } = await supabase.from("settings").upsert({
+        id: "gallery_images",
+        value: JSON.stringify(galleryArray)
+      });
+      if (error) throw error;
+      loadAdminGallery();
+    } catch (err) {
+      alert("Error actualizando galería: " + err.message);
+    }
+  }
+
+  if (formManageGallery) {
+    formManageGallery.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("gallery-photo-file");
+      if (!fileInput.files || fileInput.files.length === 0) return;
+      
+      const btnSubmit = formManageGallery.querySelector("button[type='submit']");
+      const originalText = btnSubmit.innerHTML;
+      btnSubmit.setAttribute("disabled", "true");
+      btnSubmit.innerText = "Subiendo...";
+      
+      try {
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `gallery_${Date.now()}.${fileExt}`;
+        
+        // Usamos el mismo bucket 'logos' para ahorrar configuración en Supabase
+        const { error: uploadError } = await supabase.storage
+          .from('logos') 
+          .upload(fileName, file, { cacheControl: '3600', upsert: true });
+          
+        if (uploadError) throw uploadError;
+        
+        const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+        galleryArray.unshift(urlData.publicUrl); // Insertamos al inicio de la matriz
+        
+        await saveGallerySettings();
+        formManageGallery.reset();
+      } catch (err) {
+        alert("Error al subir foto: " + err.message);
+      } finally {
+        btnSubmit.removeAttribute("disabled");
+        btnSubmit.innerHTML = originalText;
+        if (window.lucide) window.lucide.createIcons();
       }
     });
   }

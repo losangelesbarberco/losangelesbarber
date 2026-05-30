@@ -11,7 +11,7 @@ title: Inicio & Reservas
   <!-- Encabezado de Marca -->
   <header class="brand-header">
     <div id="dyn-logo-container">
-      <span class="brand-logo">Elegance</span>
+      <span class="brand-logo">Los Angeles Barber</span>
     </div>
     <i data-lucide="scissors" style="stroke:var(--primary); width:20px; height:20px;"></i>
   </header>
@@ -116,7 +116,9 @@ title: Inicio & Reservas
       <!-- Inyectado dinámicamente por JS -->
     </div>
     <div style="margin-top: 16px; margin-bottom: 24px; padding-top:16px; border-top: 1px solid rgba(255,255,255,0.1);">
-      <label for="booking-custom-date" style="display:block; font-size:0.9rem; color:var(--text-secondary); margin-bottom:8px;">O elige una fecha desde el calendario completo:</label>
+      <label for="booking-custom-date"
+        style="display:block; font-size:0.9rem; color:var(--text-secondary); margin-bottom:8px;">O elige una fecha desde
+        el calendario completo:</label>
       <input type="date" id="booking-custom-date" class="form-control" style="width:100%; color-scheme: dark;">
     </div>
 
@@ -188,20 +190,9 @@ title: Inicio & Reservas
     <span class="brand-logo">Galería</span>
     <i data-lucide="image" style="stroke:var(--primary); width:20px; height:20px;"></i>
   </header>
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
-    <!-- Imágenes de ejemplo premium -->
-    <img src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=400&q=80" alt="Corte"
-      style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
-    <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&q=80" alt="Corte"
-      style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
-    <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&q=80" alt="Corte Clásico"
-      style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
-    <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=400&q=80" alt="Estilo"
-      style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
-    <img src="https://images.unsplash.com/photo-1512690459411-b9245aed614b?w=400&q=80" alt="Barba"
-      style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
-    <img src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=400&q=80" alt="Herramientas"
-      style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
+  <div id="dyn-gallery-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; padding-bottom: 100px;">
+    <!-- Imágenes se inyectarán dinámicamente desde Supabase -->
+    <p class="text-muted" style="grid-column: 1 / -1; text-align: center;">Cargando portafolio...</p>
   </div>
 </div>
 
@@ -283,17 +274,21 @@ title: Inicio & Reservas
      ========================================================================= -->
 <div id="barber-profile-view" class="app-view" style="display: none;">
   <header class="brand-header">
-    <button class="btn btn-small" id="btn-back-barber-profile" style="background:transparent; color:var(--text-primary); padding:0; display:flex; align-items:center; gap:8px;">
+    <button class="btn btn-small" id="btn-back-barber-profile"
+      style="background:transparent; color:var(--text-primary); padding:0; display:flex; align-items:center; gap:8px;">
       <i data-lucide="arrow-left" style="width:20px; height:20px;"></i> Volver
     </button>
   </header>
   <div style="text-align:center; padding: 24px 16px; padding-bottom:100px;">
-    <img id="bp-photo" src="" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); margin-bottom:16px; background:var(--bg-surface-elevated);">
+    <img id="bp-photo" src=""
+      style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); margin-bottom:16px; background:var(--bg-surface-elevated);">
     <h2 id="bp-name" style="margin-bottom:4px;">Nombre</h2>
-    <p class="service-meta" id="bp-specialties" style="color:var(--primary); font-size:0.95rem; margin-bottom:24px;">Especialidades</p>
+    <p class="service-meta" id="bp-specialties" style="color:var(--primary); font-size:0.95rem; margin-bottom:24px;">
+      Especialidades</p>
     <div class="card" style="text-align:left; padding:16px;">
       <h3 style="margin-bottom:12px; font-size:1.1rem;">Sobre mí</h3>
-      <p id="bp-bio" style="color:var(--text-secondary); line-height:1.6; font-size:0.95rem; white-space:pre-wrap;">Biografía no disponible.</p>
+      <p id="bp-bio" style="color:var(--text-secondary); line-height:1.6; font-size:0.95rem; white-space:pre-wrap;">
+        Biografía no disponible.</p>
     </div>
   </div>
 </div>
@@ -301,12 +296,19 @@ title: Inicio & Reservas
 <!-- =========================================================================
      VISOR DE GALERÍA (LIGHTBOX)
      ========================================================================= -->
-<div id="gallery-lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center; flex-direction:column;">
-  <button id="lightbox-close" style="position:absolute; top:20px; right:20px; background:transparent; color:white; border:none; cursor:pointer;"><i data-lucide="x" style="width:32px; height:32px;"></i></button>
+<div id="gallery-lightbox"
+  style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center; flex-direction:column;">
+  <button id="lightbox-close"
+    style="position:absolute; top:20px; right:20px; background:transparent; color:white; border:none; cursor:pointer;"><i
+      data-lucide="x" style="width:32px; height:32px;"></i></button>
   <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
-    <button id="lightbox-prev" style="background:transparent; color:white; border:none; cursor:pointer; padding:20px;"><i data-lucide="chevron-left" style="width:40px; height:40px;"></i></button>
+    <button id="lightbox-prev"
+      style="background:transparent; color:white; border:none; cursor:pointer; padding:20px;"><i
+        data-lucide="chevron-left" style="width:40px; height:40px;"></i></button>
     <img id="lightbox-img" src="" style="max-width:75%; max-height:80vh; object-fit:contain; border-radius:8px;">
-    <button id="lightbox-next" style="background:transparent; color:white; border:none; cursor:pointer; padding:20px;"><i data-lucide="chevron-right" style="width:40px; height:40px;"></i></button>
+    <button id="lightbox-next"
+      style="background:transparent; color:white; border:none; cursor:pointer; padding:20px;"><i
+        data-lucide="chevron-right" style="width:40px; height:40px;"></i></button>
   </div>
 </div>
 

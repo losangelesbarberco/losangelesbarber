@@ -139,6 +139,28 @@ document.addEventListener("DOMContentLoaded", () => {
               // Aumentamos el tamaño máximo para que el logo se vea bien en celular y desktop
               logoContainer.innerHTML = `<img src="${setting.value}" alt="Logo" style="max-height: 45px; width: auto; object-fit: contain;">`;
             }
+          } else if (setting.id === 'gallery_images') {
+            const dynGallery = document.getElementById("dyn-gallery-container");
+            if (dynGallery && setting.value) {
+              const urls = JSON.parse(setting.value);
+              dynGallery.innerHTML = "";
+              if (urls.length === 0) {
+                dynGallery.innerHTML = "<p class='text-muted' style='grid-column: 1 / -1; text-align: center;'>No hay fotos publicadas en el portafolio.</p>";
+              } else {
+                urls.forEach(url => {
+                  const img = document.createElement("img");
+                  img.src = url;
+                  img.style.width = "100%";
+                  img.style.height = "150px";
+                  img.style.objectFit = "cover";
+                  img.style.borderRadius = "8px";
+                  dynGallery.appendChild(img);
+                });
+              }
+              if (typeof window.refreshGalleryLightbox === "function") {
+                window.refreshGalleryLightbox();
+              }
+            }
           } else {
             const el = document.getElementById(`dyn-${setting.id}`);
             if (el) {
@@ -629,7 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Lógica de Galería Lightbox ---
-  const galleryImages = Array.from(document.querySelectorAll("#gallery-view img"));
+  let galleryImages = [];
   const lightbox = document.getElementById("gallery-lightbox");
   const lightboxImg = document.getElementById("lightbox-img");
   const lightboxClose = document.getElementById("lightbox-close");
@@ -637,27 +659,49 @@ document.addEventListener("DOMContentLoaded", () => {
   const lightboxNext = document.getElementById("lightbox-next");
   let currentLightboxIndex = 0;
 
-  if (lightbox) {
+  function initLightboxEvents() {
+    if (!lightbox) return;
+    lightboxClose.addEventListener("click", () => lightbox.style.display = "none");
+    
+    lightboxPrev.addEventListener("click", () => {
+      if (galleryImages.length === 0) return;
+      currentLightboxIndex = (currentLightboxIndex - 1 + galleryImages.length) % galleryImages.length;
+      lightboxImg.src = galleryImages[currentLightboxIndex].src;
+    });
+    
+    lightboxNext.addEventListener("click", () => {
+      if (galleryImages.length === 0) return;
+      currentLightboxIndex = (currentLightboxIndex + 1) % galleryImages.length;
+      lightboxImg.src = galleryImages[currentLightboxIndex].src;
+    });
+  }
+
+  window.refreshGalleryLightbox = function() {
+    if (!lightbox) return;
+    const container = document.getElementById("dyn-gallery-container");
+    if (!container) return;
+    
+    galleryImages = Array.from(container.querySelectorAll("img"));
     galleryImages.forEach((img, index) => {
       img.style.cursor = "pointer";
-      img.addEventListener("click", () => {
+      
+      // Reemplazar nodo para eliminar eventos viejos si existieran
+      const newImg = img.cloneNode(true);
+      img.parentNode.replaceChild(newImg, img);
+      
+      newImg.addEventListener("click", () => {
         currentLightboxIndex = index;
         lightboxImg.src = galleryImages[currentLightboxIndex].src;
         lightbox.style.display = "flex";
       });
     });
+    
+    // Actualizar referencia
+    galleryImages = Array.from(container.querySelectorAll("img"));
+  };
 
-    lightboxClose.addEventListener("click", () => lightbox.style.display = "none");
-
-    lightboxPrev.addEventListener("click", () => {
-      currentLightboxIndex = (currentLightboxIndex - 1 + galleryImages.length) % galleryImages.length;
-      lightboxImg.src = galleryImages[currentLightboxIndex].src;
-    });
-
-    lightboxNext.addEventListener("click", () => {
-      currentLightboxIndex = (currentLightboxIndex + 1) % galleryImages.length;
-      lightboxImg.src = galleryImages[currentLightboxIndex].src;
-    });
-  }
+  initLightboxEvents();
+  // Llamada inicial por si hay imágenes precargadas
+  window.refreshGalleryLightbox();
 
 });
