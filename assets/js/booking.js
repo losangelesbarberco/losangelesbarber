@@ -119,6 +119,20 @@ document.addEventListener("DOMContentLoaded", () => {
               linkEl.style.display = "flex";
               hasSocialLinks = true;
             }
+          } else if (setting.id === "facebook_url") {
+            const linkEl = document.getElementById("link-facebook");
+            if (linkEl && setting.value.trim() !== '') {
+              let url = setting.value.trim();
+              if (!url.startsWith('http')) url = 'https://' + url;
+              linkEl.href = url;
+              linkEl.style.display = "flex";
+              hasSocialLinks = true;
+            }
+          } else if (setting.id === 'map_url') {
+            const mapIframe = document.getElementById("map-iframe");
+            if (mapIframe && setting.value.trim() !== '') {
+              mapIframe.src = setting.value.trim();
+            }
           } else if (setting.id === 'logo_url') {
             const logoContainer = document.getElementById('dyn-logo-container');
             if (logoContainer && setting.value.trim() !== '') {
@@ -199,23 +213,23 @@ document.addEventListener("DOMContentLoaded", () => {
           photoEl.src = "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=150&auto=format&fit=crop&q=80";
         }
 
-        // Ocultar todas las vistas y mostrar el perfil
-        document.querySelectorAll(".app-view").forEach(v => v.style.display = "none");
-        document.getElementById("barber-profile-view").style.display = "block";
+        // Ocultar todas las vistas y mostrar el perfil usando clases o display pero 
+        // sin romper hash, o mejor usando :target simulado
+        document.querySelectorAll(".app-view").forEach(v => v.classList.remove("active-override"));
+        document.getElementById("barber-profile-view").classList.add("active-override");
+        
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       const btnBackProfile = document.getElementById("btn-back-barber-profile");
       if (btnBackProfile) {
         btnBackProfile.addEventListener("click", () => {
-          document.querySelectorAll(".app-view").forEach(v => v.style.display = "none");
-          document.getElementById("info-view").style.display = "block";
+          document.getElementById("barber-profile-view").classList.remove("active-override");
+          window.location.hash = "#info";
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
       }
 
-      // Re-inicializar iconos
-      if (window.lucide) window.lucide.createIcons();
     } catch (err) {
       console.error("Error cargando equipo:", err.message);
     }
@@ -358,6 +372,27 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       dateScrollContainer.appendChild(bubble);
+    }
+    
+    // Configurar input de fecha nativo
+    const customDateInput = document.getElementById("booking-custom-date");
+    if (customDateInput) {
+      // Set min date to today
+      const today = new Date().toISOString().split("T")[0];
+      customDateInput.min = today;
+      
+      customDateInput.addEventListener("change", (e) => {
+        const selectedDate = e.target.value;
+        if (!selectedDate) return;
+        
+        // Quitar selección de las burbujas horizontales
+        document.querySelectorAll(".date-bubble").forEach(b => b.classList.remove("selected"));
+        
+        bookingState.selectedDate = selectedDate;
+        bookingState.selectedTime = "";
+        document.getElementById("btn-to-step4").setAttribute("disabled", "true");
+        loadAvailableTimes();
+      });
     }
   }
 
@@ -584,6 +619,38 @@ document.addEventListener("DOMContentLoaded", () => {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = originalText;
       }
+    });
+  }
+
+  // --- Lógica de Galería Lightbox ---
+  const galleryImages = Array.from(document.querySelectorAll("#gallery-view img"));
+  const lightbox = document.getElementById("gallery-lightbox");
+  const lightboxImg = document.getElementById("lightbox-img");
+  const lightboxClose = document.getElementById("lightbox-close");
+  const lightboxPrev = document.getElementById("lightbox-prev");
+  const lightboxNext = document.getElementById("lightbox-next");
+  let currentLightboxIndex = 0;
+
+  if (lightbox) {
+    galleryImages.forEach((img, index) => {
+      img.style.cursor = "pointer";
+      img.addEventListener("click", () => {
+        currentLightboxIndex = index;
+        lightboxImg.src = galleryImages[currentLightboxIndex].src;
+        lightbox.style.display = "flex";
+      });
+    });
+
+    lightboxClose.addEventListener("click", () => lightbox.style.display = "none");
+
+    lightboxPrev.addEventListener("click", () => {
+      currentLightboxIndex = (currentLightboxIndex - 1 + galleryImages.length) % galleryImages.length;
+      lightboxImg.src = galleryImages[currentLightboxIndex].src;
+    });
+
+    lightboxNext.addEventListener("click", () => {
+      currentLightboxIndex = (currentLightboxIndex + 1) % galleryImages.length;
+      lightboxImg.src = galleryImages[currentLightboxIndex].src;
     });
   }
 

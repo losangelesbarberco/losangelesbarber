@@ -591,8 +591,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="service-meta" style="color:var(--primary); font-size:0.85rem; margin-bottom:4px;">${emailText}</span>
             <span class="service-meta">${specText}</span>
           </div>
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <div style="display:flex; gap:6px;">
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+            <div style="display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px;">
               <button class="btn btn-primary btn-small edit-barber-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${barber.id}">Editar</button>
               <button class="btn btn-danger btn-small toggle-barber-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${barber.id}" data-active="${barber.active}">
                 ${barber.active ? 'Desactivar' : 'Activar'}
@@ -793,7 +793,7 @@ document.addEventListener("DOMContentLoaded", () => {
           logoUrl = urlData.publicUrl;
         }
 
-        const ids = ['hero_subtitle', 'hero_title', 'hero_desc', 'info_address', 'info_hours_wk', 'info_hours_we', 'social_whatsapp', 'social_instagram', 'social_facebook'];
+        const ids = ['hero_subtitle', 'hero_title', 'hero_desc', 'info_address', 'info_hours_wk', 'info_hours_we', 'social_whatsapp', 'social_instagram', 'facebook_url', 'map_url'];
         const updates = ids.map(id => {
           return { id: id, value: document.getElementById(`set-${id}`).value.trim() };
         });
