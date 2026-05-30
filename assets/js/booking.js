@@ -89,14 +89,37 @@ document.addEventListener("DOMContentLoaded", () => {
     switchView("home");
   }
 
+  // --- Comprobar Sesión para Menú Admin ---
+  async function checkAdminMenu() {
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data && data.session) {
+        const navAdmin = document.getElementById("nav-admin");
+        if (navAdmin) navAdmin.style.display = "flex";
+      }
+    } catch (e) {}
+  }
+  checkAdminMenu();
+
   // --- Cargar configuraciones del Home dinámicamente ---
   async function loadHomeSettings() {
     try {
       const { data: settings, error } = await supabase.from("settings").select("*");
       if (error) throw error;
       if (settings && settings.length > 0) {
+        let hasSocialLinks = false;
         settings.forEach(setting => {
-          if (setting.id === 'logo_url') {
+          if (setting.id.startsWith("social_")) {
+            const network = setting.id.replace("social_", "");
+            const linkEl = document.getElementById(`link-${network}`);
+            if (linkEl && setting.value.trim() !== '') {
+              let url = setting.value.trim();
+              if (!url.startsWith('http')) url = 'https://' + url;
+              linkEl.href = url;
+              linkEl.style.display = "flex";
+              hasSocialLinks = true;
+            }
+          } else if (setting.id === 'logo_url') {
             const logoContainer = document.getElementById('dyn-logo-container');
             if (logoContainer && setting.value.trim() !== '') {
               // Aumentamos el tamaño máximo para que el logo se vea bien en celular y desktop
@@ -109,6 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
         });
+
+        if (hasSocialLinks) {
+          const socialCard = document.getElementById("social-media-card");
+          if (socialCard) socialCard.style.display = "block";
+        }
       }
     } catch (err) {
       console.error("Error cargando configuraciones del Home:", err.message);

@@ -651,7 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
           logoUrl = urlData.publicUrl;
         }
 
-        const ids = ['hero_subtitle', 'hero_title', 'hero_desc', 'info_address', 'info_hours_wk', 'info_hours_we'];
+        const ids = ['hero_subtitle', 'hero_title', 'hero_desc', 'info_address', 'info_hours_wk', 'info_hours_we', 'social_whatsapp', 'social_instagram', 'social_facebook'];
         const updates = ids.map(id => {
           return { id: id, value: document.getElementById(`set-${id}`).value.trim() };
         });

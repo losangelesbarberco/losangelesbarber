@@ -3,6 +3,7 @@ email: contacto@barberiaelegance.com
 description: Reserva tu turno de forma rápida y sencilla con los mejores barberos.
 baseurl: "/losangelesbarber"
 url: "https://losangelesbarberco.github.io"
+primary_color: "#FFD700"
 
 markdown: kramdown
 exclude:

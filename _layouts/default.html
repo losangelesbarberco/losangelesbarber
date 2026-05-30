@@ -16,6 +16,15 @@
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
   
+  {% if site.primary_color %}
+  <!-- Inyección de Color Dinámico desde _config.yml -->
+  <style>
+    :root {
+      --primary: {{ site.primary_color }} !important;
+    }
+  </style>
+  {% endif %}
+  
   <!-- Supabase JS Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
