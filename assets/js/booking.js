@@ -99,7 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
           if (setting.id === 'logo_url') {
             const logoContainer = document.getElementById('dyn-logo-container');
             if (logoContainer && setting.value.trim() !== '') {
-              logoContainer.innerHTML = `<img src="${setting.value}" alt="Logo" style="max-height: 28px; object-fit: contain;">`;
+              // Aumentamos el tamaño máximo para que el logo se vea bien en celular y desktop
+              logoContainer.innerHTML = `<img src="${setting.value}" alt="Logo" style="max-height: 45px; width: auto; object-fit: contain;">`;
             }
           } else {
             const el = document.getElementById(`dyn-${setting.id}`);
