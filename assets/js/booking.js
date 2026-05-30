@@ -15,11 +15,15 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Elementos del DOM ---
-  const navHome = document.getElementById("nav-home");
-  const navBooking = document.getElementById("nav-booking");
-  
   const viewHome = document.getElementById("home-view");
   const viewBooking = document.getElementById("booking-view");
+  const viewGallery = document.getElementById("gallery-view");
+  const viewInfo = document.getElementById("info-view");
+
+  const navHome = document.getElementById("nav-home");
+  const navBooking = document.getElementById("nav-booking");
+  const navGallery = document.getElementById("nav-gallery");
+  const navInfo = document.getElementById("nav-info");
 
   const servicesContainer = document.getElementById("services-container");
   const barbersContainer = document.getElementById("barbers-container");
@@ -42,36 +46,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- 1. Lógica de Pestañas (Bottom Navigation) ---
   function switchView(viewName) {
-    if (viewName === "home") {
-      viewHome.classList.add("active");
-      viewBooking.classList.remove("active");
-      navHome.classList.add("active");
-      navBooking.classList.remove("active");
-      window.location.hash = "#home";
-    } else if (viewName === "booking") {
-      viewHome.classList.remove("active");
-      viewBooking.classList.add("active");
-      navHome.classList.remove("active");
-      navBooking.classList.add("active");
-      window.location.hash = "#booking";
-    }
+    const views = {
+      home: viewHome,
+      booking: viewBooking,
+      gallery: viewGallery,
+      info: viewInfo
+    };
+    
+    const navs = {
+      home: navHome,
+      booking: navBooking,
+      gallery: navGallery,
+      info: navInfo
+    };
+
+    // Ocultar todos
+    Object.values(views).forEach(v => { if(v) v.classList.remove("active"); });
+    Object.values(navs).forEach(n => { if(n) n.classList.remove("active"); });
+
+    // Mostrar el solicitado
+    if (views[viewName]) views[viewName].classList.add("active");
+    if (navs[viewName]) navs[viewName].classList.add("active");
+    
+    window.location.hash = "#" + viewName;
   }
 
-  navHome.addEventListener("click", (e) => {
-    e.preventDefault();
-    switchView("home");
-  });
-
-  navBooking.addEventListener("click", (e) => {
-    e.preventDefault();
-    switchView("booking");
-    resetBookingWizard();
-  });
+  if (navHome) navHome.addEventListener("click", (e) => { e.preventDefault(); switchView("home"); });
+  if (navBooking) navBooking.addEventListener("click", (e) => { e.preventDefault(); switchView("booking"); resetBookingWizard(); });
+  if (navGallery) navGallery.addEventListener("click", (e) => { e.preventDefault(); switchView("gallery"); });
+  if (navInfo) navInfo.addEventListener("click", (e) => { e.preventDefault(); switchView("info"); });
 
   // Manejar hash inicial al cargar
-  if (window.location.hash === "#booking") {
+  const hash = window.location.hash;
+  if (hash === "#booking") {
     switchView("booking");
-    resetBookingWizard(); // ¡Faltaba llamar a esta función para cargar los servicios al refrescar!
+    resetBookingWizard();
+  } else if (hash === "#gallery") {
+    switchView("gallery");
+  } else if (hash === "#info") {
+    switchView("info");
   } else {
     switchView("home");
   }
@@ -83,9 +96,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) throw error;
       if (settings && settings.length > 0) {
         settings.forEach(setting => {
-          const el = document.getElementById(`dyn-${setting.id}`);
-          if (el) {
-            el.innerHTML = setting.value;
+          if (setting.id === 'logo_url') {
+            const logoContainer = document.getElementById('dyn-logo-container');
+            if (logoContainer && setting.value.trim() !== '') {
+              logoContainer.innerHTML = `<img src="${setting.value}" alt="Logo" style="max-height: 28px; object-fit: contain;">`;
+            }
+          } else {
+            const el = document.getElementById(`dyn-${setting.id}`);
+            if (el) {
+              el.innerHTML = setting.value;
+            }
           }
         });
       }
@@ -96,7 +116,43 @@ document.addEventListener("DOMContentLoaded", () => {
   
   loadHomeSettings();
 
-  // --- 2. Carga de Datos desde Supabase ---
+  // --- Cargar Equipo (Barberos) ---
+  async function loadTeam() {
+    const teamContainer = document.getElementById("team-container");
+    if (!teamContainer) return;
+    try {
+      const { data: barbers, error } = await supabase.from("barbers").select("*").eq("active", true);
+      if (error) throw error;
+      
+      if (barbers.length === 0) {
+        teamContainer.innerHTML = "<p class='text-muted'>No hay barberos registrados.</p>";
+        return;
+      }
+      
+      teamContainer.innerHTML = "";
+      barbers.forEach(barber => {
+        const specText = barber.specialties ? barber.specialties.join(" • ") : "Estilista";
+        teamContainer.innerHTML += `
+          <div style="display:flex; align-items:center; gap:12px; background:var(--bg-surface); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-surface-elevated); display:flex; align-items:center; justify-content:center;">
+              <i data-lucide="user" style="stroke:var(--primary); width:20px; height:20px;"></i>
+            </div>
+            <div>
+              <div style="font-weight:600; color:var(--text-primary);">${barber.name}</div>
+              <div style="font-size:0.8rem; color:var(--primary);">${specText}</div>
+            </div>
+          </div>
+        `;
+      });
+      // Re-inicializar iconos
+      if (window.lucide) window.lucide.createIcons();
+    } catch (err) {
+      console.error("Error cargando equipo:", err.message);
+    }
+  }
+  loadTeam();
+
+  // --- 2. Carga de Datos desde Supabase (Reservas) ---
   async function loadServices() {
     try {
       const { data: services, error } = await supabase
