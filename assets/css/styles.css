@@ -63,20 +63,10 @@ body {
   overflow: hidden;
 }
 
-/* Simulación de dispositivo móvil en pantallas de escritorio */
-@media (min-width: 480px) {
+/* Fondo sutil en pantallas más grandes */
+@media (min-width: 768px) {
   body {
     background: radial-gradient(circle at top left, #2c1a04 0%, #030303 70%);
-  }
-  
-  .app-frame {
-    max-width: 420px;
-    height: 880px;
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
-                0 0 0 12px #1e1e1e, /* Borde físico del teléfono */
-                0 0 30px 5px var(--primary-glow);
-    border: 4px solid #2d2d2d;
   }
 }
 
@@ -685,4 +675,95 @@ h1, h2, h3, h4 {
 
 .admin-subpane.active {
   display: block;
+}
+
+/* =========================================================================
+   RESPONSIVE DESIGN (DESKTOP & TABLET)
+   ========================================================================= */
+@media (min-width: 768px) {
+  /* Contenedor Principal: Fila en lugar de Columna */
+  .app-frame {
+    flex-direction: row;
+    max-width: 1440px;
+    margin: 0 auto;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+  
+  /* Navbar Lateral (Sidebar) */
+  .bottom-nav {
+    position: static; /* Quita el fixed inferior */
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 250px;
+    min-width: 250px;
+    height: 100vh;
+    border-top: none;
+    border-right: 1px solid var(--glass-border);
+    padding-top: 40px;
+    gap: 8px;
+  }
+
+  .nav-item {
+    flex: none;
+    flex-direction: row;
+    padding: 16px 30px;
+    font-size: 1rem;
+    gap: 16px;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  .nav-item.active .nav-icon {
+    transform: scale(1.1); /* Quitamos el translate-Y en el menú lateral */
+  }
+
+  /* El contenido ocupa el resto del espacio */
+  .app-content {
+    padding: 40px 60px;
+  }
+  
+  /* Grids para listas y calendarios */
+  .services-list, .barbers-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  
+  .time-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
+  }
+
+  .date-selector-scroll {
+    gap: 16px;
+  }
+  
+  .date-bubble {
+    min-width: 80px;
+    height: 90px;
+  }
+  
+  .date-bubble-day {
+    font-size: 1.5rem;
+  }
+  
+  /* Wizard Centrado */
+  .wizard-steps {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Hero Expandido */
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .hero-desc {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
 }

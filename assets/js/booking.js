@@ -71,9 +71,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // Manejar hash inicial al cargar
   if (window.location.hash === "#booking") {
     switchView("booking");
+    resetBookingWizard(); // ¡Faltaba llamar a esta función para cargar los servicios al refrescar!
   } else {
     switchView("home");
   }
+
+  // --- Cargar configuraciones del Home dinámicamente ---
+  async function loadHomeSettings() {
+    try {
+      const { data: settings, error } = await supabase.from("settings").select("*");
+      if (error) throw error;
+      if (settings && settings.length > 0) {
+        settings.forEach(setting => {
+          const el = document.getElementById(`dyn-${setting.id}`);
+          if (el) {
+            el.innerHTML = setting.value;
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error cargando configuraciones del Home:", err.message);
+    }
+  }
+  
+  loadHomeSettings();
 
   // --- 2. Carga de Datos desde Supabase ---
   async function loadServices() {
@@ -355,6 +376,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Botón "Reservar de Nuevo" en la pantalla final de éxito
   document.getElementById("btn-reset-booking").addEventListener("click", () => {
     resetBookingWizard();
+  });
+
+  // Permitir volver a pasos anteriores haciendo clic en el indicador superior
+  steps.forEach((step, index) => {
+    const indicator = document.getElementById(step.indicator);
+    if (indicator) {
+      indicator.addEventListener("click", () => {
+        // Solo permitir ir a pasos anteriores o al paso actual
+        if (index < currentStepIndex || indicator.classList.contains("completed")) {
+          goToStep(index);
+        }
+      });
+      // Añadir estilo pointer para indicar que es clicable
+      indicator.style.cursor = "pointer";
+    }
   });
 
   // --- 5. Envío de Cita a Supabase ---

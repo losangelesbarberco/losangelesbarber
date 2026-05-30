@@ -39,6 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const formManageService = document.getElementById("form-manage-service");
   const listAdminServices = document.getElementById("list-admin-services");
 
+  // Formularios Super Admin adicionales
+  const formManageBarber = document.getElementById("form-manage-barber");
+  const listAdminBarbers = document.getElementById("list-admin-barbers");
+  const formManageHome = document.getElementById("form-manage-home");
+
   // --- Sub-pestañas de Admin (Solo Super Admin) ---
   const tabBtns = document.querySelectorAll(".admin-tab-btn");
   const subPanes = document.querySelectorAll(".admin-subpane");
@@ -56,6 +61,10 @@ document.addEventListener("DOMContentLoaded", () => {
         loadAppointments();
       } else if (targetId === "tab-services") {
         loadAdminServices();
+      } else if (targetId === "tab-barbers") {
+        loadAdminBarbers();
+      } else if (targetId === "tab-homeconfig") {
+        loadAdminHomeConfig();
       }
     });
   });
@@ -467,7 +476,168 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- 7. Cierre de Sesión ---
+  // --- 8. Administración de Barberos (Solo Super Admin) ---
+  async function loadAdminBarbers() {
+    listAdminBarbers.innerHTML = "<p class='text-muted'>Cargando barberos...</p>";
+    try {
+      const { data: barbers, error } = await supabase.from("barbers").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      listAdminBarbers.innerHTML = "";
+      if (barbers.length === 0) {
+        listAdminBarbers.innerHTML = "<p class='text-muted'>No hay barberos registrados.</p>";
+        return;
+      }
+      barbers.forEach(barber => {
+        const item = document.createElement("div");
+        item.className = "service-item"; // Usamos el mismo estilo de card
+        item.style.cursor = "default";
+        const specText = barber.specialties ? barber.specialties.join(", ") : "Sin especialidades";
+        const emailText = barber.login_email ? barber.login_email : "Sin correo vinculado";
+        
+        item.innerHTML = `
+          <div class="service-info">
+            <span class="service-name">${barber.name} ${!barber.active ? '<span class="text-danger">(Inactivo)</span>' : ''}</span>
+            <span class="service-meta" style="color:var(--primary); font-size:0.85rem; margin-bottom:4px;">${emailText}</span>
+            <span class="service-meta">${specText}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button class="btn btn-danger btn-small toggle-barber-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${barber.id}" data-active="${barber.active}">
+              ${barber.active ? 'Desactivar' : 'Activar'}
+            </button>
+            <button class="btn btn-small delete-barber-btn" style="padding:4px 8px; font-size:0.75rem; background:transparent; border:1px solid #ff4d4d; color:#ff4d4d;" data-id="${barber.id}">
+              Eliminar
+            </button>
+          </div>
+        `;
+        const btnToggle = item.querySelector(".toggle-barber-btn");
+        btnToggle.addEventListener("click", () => toggleBarberActive(barber.id, barber.active));
+        
+        const btnDelete = item.querySelector(".delete-barber-btn");
+        btnDelete.addEventListener("click", () => deleteBarber(barber.id));
+
+        listAdminBarbers.appendChild(item);
+      });
+    } catch (err) {
+      console.error("Error cargando barberos:", err.message);
+      listAdminBarbers.innerHTML = "<p class='text-danger'>Error al conectar con la base de datos.</p>";
+    }
+  }
+
+  async function toggleBarberActive(barberId, currentActive) {
+    try {
+      const { error } = await supabase.from("barbers").update({ active: !currentActive }).eq("id", barberId);
+      if (error) throw error;
+      loadAdminBarbers();
+    } catch (err) {
+      alert("Error al modificar barbero: " + err.message);
+    }
+  }
+
+  async function deleteBarber(barberId) {
+    if (!confirm("¿Estás seguro de que deseas eliminar permanentemente a este barbero? (Sus citas pasadas quedarán en el historial como 'Sin Asignar').")) return;
+    try {
+      const { error } = await supabase.from("barbers").delete().eq("id", barberId);
+      if (error) throw error;
+      loadAdminBarbers();
+    } catch (err) {
+      alert("Error al eliminar barbero: " + err.message);
+    }
+  }
+
+  if (formManageBarber) {
+    formManageBarber.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btnSubmit = formManageBarber.querySelector("button[type='submit']");
+      btnSubmit.setAttribute("disabled", "true");
+      btnSubmit.innerText = "Registrando...";
+
+      const name = document.getElementById("barber-name").value.trim();
+      const email = document.getElementById("barber-email").value.trim();
+      const password = document.getElementById("barber-password").value;
+      const specString = document.getElementById("barber-specialties").value.trim();
+      const specialties = specString ? specString.split(",").map(s => s.trim()) : [];
+
+      try {
+        // Truco: Crear cliente secundario para no cerrar la sesión del admin
+        const tempClient = window.SupabaseLib.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
+          auth: { persistSession: false }
+        });
+
+        // Registrar la cuenta en Supabase Auth
+        const { data: authData, error: authError } = await tempClient.auth.signUp({
+          email,
+          password
+        });
+
+        if (authError) throw new Error("Error al crear cuenta: " + authError.message);
+
+        const newUserId = authData.user ? authData.user.id : null;
+
+        // Insertar perfil del barbero en la tabla pública
+        const { error } = await supabase.from("barbers").insert([{ 
+          user_id: newUserId,
+          login_email: email,
+          name, 
+          specialties, 
+          active: true 
+        }]);
+
+        if (error) throw new Error("Error al enlazar barbero: " + error.message);
+        
+        alert("Barbero creado exitosamente con sus credenciales de acceso.");
+        formManageBarber.reset();
+        loadAdminBarbers();
+      } catch (err) {
+        alert("Atención: " + err.message);
+      } finally {
+        btnSubmit.removeAttribute("disabled");
+        btnSubmit.innerText = "Crear Barbero";
+      }
+    });
+  }
+
+  // --- 9. Configuración del Inicio (Solo Super Admin) ---
+  async function loadAdminHomeConfig() {
+    try {
+      const { data: settings, error } = await supabase.from("settings").select("*");
+      if (error) throw error;
+      if (settings) {
+        settings.forEach(setting => {
+          const el = document.getElementById(`set-${setting.id}`);
+          if (el) el.value = setting.value;
+        });
+      }
+    } catch (err) {
+      console.error("Error cargando config de inicio:", err.message);
+    }
+  }
+
+  if (formManageHome) {
+    formManageHome.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btnSubmit = formManageHome.querySelector("button[type='submit']");
+      btnSubmit.setAttribute("disabled", "true");
+      btnSubmit.innerText = "Guardando...";
+
+      const ids = ['hero_subtitle', 'hero_title', 'hero_desc', 'info_address', 'info_hours_wk', 'info_hours_we'];
+      const updates = ids.map(id => {
+        return { id: id, value: document.getElementById(`set-${id}`).value.trim() };
+      });
+
+      try {
+        const { error } = await supabase.from("settings").upsert(updates);
+        if (error) throw error;
+        alert("Textos de inicio guardados correctamente.");
+      } catch (err) {
+        alert("Error guardando configuración: " + err.message);
+      } finally {
+        btnSubmit.removeAttribute("disabled");
+        btnSubmit.innerText = "Guardar Textos";
+      }
+    });
+  }
+
+  // --- 10. Cierre de Sesión ---
   async function handleLogout() {
     try {
       await supabase.auth.signOut();
