@@ -63,6 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Ocultar todos
     Object.values(views).forEach(v => { if(v) v.classList.remove("active"); });
     Object.values(navs).forEach(n => { if(n) n.classList.remove("active"); });
+    
+    const barberProfileView = document.getElementById("barber-profile-view");
+    if (barberProfileView) barberProfileView.classList.remove("active");
 
     // Mostrar el solicitado
     if (views[viewName]) views[viewName].classList.add("active");
