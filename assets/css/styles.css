@@ -73,7 +73,7 @@ body {
 .app-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 20px calc(80px + var(--safe-area-bottom)) 20px;
+  padding: 20px; /* Reducido ya que el nav ahora no es absoluto */
   scroll-behavior: smooth;
 }
 
@@ -84,10 +84,8 @@ body {
 
 /* --- Barra de Navegación Inferior (Bottom Nav) --- */
 .bottom-nav {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex-shrink: 0; /* Para evitar que se comprima si hay mucho contenido */
+  width: 100%;
   height: calc(65px + var(--safe-area-bottom));
   background: rgba(19, 19, 22, 0.85);
   backdrop-filter: blur(20px);
