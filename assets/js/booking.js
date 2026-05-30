@@ -165,8 +165,12 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `<img src="${barber.photo_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
           : `<i data-lucide="user" style="stroke:var(--primary); width:20px; height:20px;"></i>`;
           
-        teamContainer.innerHTML += `
-          <div style="display:flex; align-items:center; gap:12px; background:var(--bg-surface); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+        const barberCard = document.createElement("div");
+        barberCard.style.cssText = "display:flex; align-items:center; gap:12px; background:var(--bg-surface); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); cursor:pointer; transition: transform 0.2s, background 0.2s;";
+        barberCard.onmouseover = () => barberCard.style.background = "var(--bg-surface-elevated)";
+        barberCard.onmouseout = () => barberCard.style.background = "var(--bg-surface)";
+        
+        barberCard.innerHTML = `
             <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-surface-elevated); display:flex; align-items:center; justify-content:center; overflow:hidden;">
               ${avatarHtml}
             </div>
@@ -174,9 +178,42 @@ document.addEventListener("DOMContentLoaded", () => {
               <div style="font-weight:600; color:var(--text-primary);">${barber.name}</div>
               <div style="font-size:0.8rem; color:var(--primary);">${specText}</div>
             </div>
-          </div>
         `;
+        
+        barberCard.addEventListener("click", () => showBarberProfile(barber));
+        teamContainer.appendChild(barberCard);
       });
+
+      // Lógica de Perfil Público de Barbero
+      function showBarberProfile(barber) {
+        document.getElementById("bp-name").innerText = barber.name;
+        document.getElementById("bp-specialties").innerText = barber.specialties ? barber.specialties.join(" • ") : "Estilista";
+        document.getElementById("bp-bio").innerText = barber.bio || "Biografía no disponible.";
+        
+        const photoEl = document.getElementById("bp-photo");
+        if (barber.photo_url) {
+          photoEl.src = barber.photo_url;
+          photoEl.style.display = "inline-block";
+        } else {
+          // Fallback
+          photoEl.src = "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=150&auto=format&fit=crop&q=80";
+        }
+
+        // Ocultar todas las vistas y mostrar el perfil
+        document.querySelectorAll(".app-view").forEach(v => v.style.display = "none");
+        document.getElementById("barber-profile-view").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      const btnBackProfile = document.getElementById("btn-back-barber-profile");
+      if (btnBackProfile) {
+        btnBackProfile.addEventListener("click", () => {
+          document.querySelectorAll(".app-view").forEach(v => v.style.display = "none");
+          document.getElementById("info-view").style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+
       // Re-inicializar iconos
       if (window.lucide) window.lucide.createIcons();
     } catch (err) {
@@ -213,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="service-name">${service.name}</span>
             <span class="service-meta">${service.duration_minutes} min • ${service.description || ''}</span>
           </div>
-          <span class="service-price">$${Number(service.price)}</span>
+          <span class="service-price">$${Number(service.price).toLocaleString('es-CO')}</span>
         `;
         
         item.addEventListener("click", () => {
@@ -420,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <p class="service-meta"><strong style="color:#fff">Hora:</strong> ${bookingState.selectedTime} hs</p>
           <div style="border-top:1px solid rgba(255,255,255,0.05); margin-top:12px; padding-top:12px; display:flex; justify-content:space-between;">
             <strong>Total a Pagar:</strong>
-            <strong style="color:var(--primary); font-size:1.1rem;">$${parseFloat(bookingState.servicePrice).toFixed(2)}</strong>
+            <strong style="color:var(--primary); font-size:1.1rem;">$${Number(bookingState.servicePrice).toLocaleString('es-CO')}</strong>
           </div>
         </div>
       `;

@@ -274,6 +274,26 @@ title: Inicio & Reservas
   </div>
 </div>
 
+<!-- =========================================================================
+     VISTA DE PERFIL DE BARBERO
+     ========================================================================= -->
+<div id="barber-profile-view" class="app-view" style="display: none;">
+  <header class="brand-header">
+    <button class="btn btn-small" id="btn-back-barber-profile" style="background:transparent; color:var(--text-primary); padding:0; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="arrow-left" style="width:20px; height:20px;"></i> Volver
+    </button>
+  </header>
+  <div style="text-align:center; padding: 24px 16px; padding-bottom:100px;">
+    <img id="bp-photo" src="" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); margin-bottom:16px; background:var(--bg-surface-elevated);">
+    <h2 id="bp-name" style="margin-bottom:4px;">Nombre</h2>
+    <p class="service-meta" id="bp-specialties" style="color:var(--primary); font-size:0.95rem; margin-bottom:24px;">Especialidades</p>
+    <div class="card" style="text-align:left; padding:16px;">
+      <h3 style="margin-bottom:12px; font-size:1.1rem;">Sobre mí</h3>
+      <p id="bp-bio" style="color:var(--text-secondary); line-height:1.6; font-size:0.95rem; white-space:pre-wrap;">Biografía no disponible.</p>
+    </div>
+  </div>
+</div>
+
 <!-- Inyección de Lógica -->
 <script src="{{ '/assets/js/supabase-client.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/booking.js' | relative_url }}"></script>

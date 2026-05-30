@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="service-meta">${service.duration_minutes} min • ${service.description || 'Sin descripción'}</span>
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-            <span class="service-price">$${parseFloat(service.price).toFixed(2)}</span>
+            <span class="service-price">$${Number(service.price).toLocaleString('es-CO')}</span>
             <div style="display:flex; gap:6px;">
               <button class="btn btn-primary btn-small edit-service-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${service.id}">Editar</button>
               <button class="btn btn-danger btn-small toggle-service-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${service.id}" data-active="${service.active}">
