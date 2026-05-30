@@ -646,6 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("barber-name").value = barber.name;
     document.getElementById("barber-email").value = barber.login_email || '';
     document.getElementById("barber-specialties").value = barber.specialties ? barber.specialties.join(", ") : "";
+    document.getElementById("barber-bio").value = barber.bio || '';
     
     // Deshabilitar credenciales para edición
     document.getElementById("barber-email").setAttribute("disabled", "true");
@@ -685,11 +686,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("barber-password").value;
       const specString = document.getElementById("barber-specialties").value.trim();
       const specialties = specString ? specString.split(",").map(s => s.trim()) : [];
+      const bio = document.getElementById("barber-bio").value.trim();
 
       try {
         if (barberId) {
           // Modo Edición
-          const { error } = await supabase.from("barbers").update({ name, specialties }).eq("id", barberId);
+          const { error } = await supabase.from("barbers").update({ name, specialties, bio }).eq("id", barberId);
           if (error) throw new Error("Error al actualizar: " + error.message);
           alert("Barbero actualizado exitosamente.");
         } else {
@@ -709,6 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
             login_email: email,
             name, 
             specialties, 
+            bio,
             active: true 
           }]);
           if (error) throw new Error("Error al enlazar barbero: " + error.message);

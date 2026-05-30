@@ -161,10 +161,14 @@ document.addEventListener("DOMContentLoaded", () => {
       teamContainer.innerHTML = "";
       barbers.forEach(barber => {
         const specText = barber.specialties ? barber.specialties.join(" • ") : "Estilista";
+        const avatarHtml = barber.photo_url 
+          ? `<img src="${barber.photo_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` 
+          : `<i data-lucide="user" style="stroke:var(--primary); width:20px; height:20px;"></i>`;
+          
         teamContainer.innerHTML += `
           <div style="display:flex; align-items:center; gap:12px; background:var(--bg-surface); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-            <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-surface-elevated); display:flex; align-items:center; justify-content:center;">
-              <i data-lucide="user" style="stroke:var(--primary); width:20px; height:20px;"></i>
+            <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-surface-elevated); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+              ${avatarHtml}
             </div>
             <div>
               <div style="font-weight:600; color:var(--text-primary);">${barber.name}</div>
@@ -209,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="service-name">${service.name}</span>
             <span class="service-meta">${service.duration_minutes} min • ${service.description || ''}</span>
           </div>
-          <span class="service-price">$${parseFloat(service.price).toFixed(2)}</span>
+          <span class="service-price">$${Number(service.price)}</span>
         `;
         
         item.addEventListener("click", () => {
