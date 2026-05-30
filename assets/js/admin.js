@@ -765,6 +765,40 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (formManageHome) {
+    
+    // --- Lógica de GPS ---
+    const btnGetGps = document.getElementById("btn-get-gps");
+    if (btnGetGps) {
+      btnGetGps.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("Tu navegador no soporta geolocalización.");
+          return;
+        }
+        
+        btnGetGps.innerHTML = `<i data-lucide="loader" class="spin" style="width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> ...`;
+        if (window.lucide) window.lucide.createIcons();
+
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const mapInput = document.getElementById("set-map_url");
+          
+          if (mapInput) {
+            // URL de embed de Google Maps con latitud y longitud
+            mapInput.value = `https://maps.google.com/maps?q=${lat},${lng}&hl=es&z=16&output=embed`;
+          }
+          
+          btnGetGps.innerHTML = `<i data-lucide="check" style="stroke:#10B981; width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> OK`;
+          if (window.lucide) window.lucide.createIcons();
+          
+        }, (err) => {
+          alert("No se pudo obtener la ubicación: Permiso denegado o error (" + err.message + ")");
+          btnGetGps.innerHTML = `<i data-lucide="map-pin" style="width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> Mi GPS`;
+          if (window.lucide) window.lucide.createIcons();
+        }, { enableHighAccuracy: true });
+      });
+    }
+
     formManageHome.addEventListener("submit", async (e) => {
       e.preventDefault();
       const btnSubmit = formManageHome.querySelector("button[type='submit']");

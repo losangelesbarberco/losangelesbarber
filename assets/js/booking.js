@@ -213,10 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
           photoEl.src = "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=150&auto=format&fit=crop&q=80";
         }
 
-        // Ocultar todas las vistas y mostrar el perfil usando clases o display pero 
-        // sin romper hash, o mejor usando :target simulado
-        document.querySelectorAll(".app-view").forEach(v => v.classList.remove("active-override"));
-        document.getElementById("barber-profile-view").classList.add("active-override");
+        // En lugar de style.display o override, simularemos un cambio de vista
+        // Ocultar la de info y mostrar la de perfil, limpiando estilos inline si los hay
+        document.querySelectorAll(".app-view").forEach(v => {
+          v.style.display = "";
+          v.classList.remove("active");
+        });
+        document.getElementById("barber-profile-view").classList.add("active");
         
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -224,8 +227,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const btnBackProfile = document.getElementById("btn-back-barber-profile");
       if (btnBackProfile) {
         btnBackProfile.addEventListener("click", () => {
-          document.getElementById("barber-profile-view").classList.remove("active-override");
-          window.location.hash = "#info";
+          document.querySelectorAll(".app-view").forEach(v => {
+            v.style.display = "";
+            v.classList.remove("active");
+          });
+          document.getElementById("info-view").classList.add("active");
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
       }
