@@ -169,6 +169,12 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
+        // Si la galería no existe aún en la base de datos, limpiamos el mensaje de "Cargando..."
+        const dynGallery = document.getElementById("dyn-gallery-container");
+        if (dynGallery && dynGallery.innerHTML.includes("Cargando portafolio...")) {
+          dynGallery.innerHTML = "<p class='text-muted' style='grid-column: 1 / -1; text-align: center;'>No hay fotos publicadas en el portafolio.</p>";
+        }
+
         if (hasSocialLinks) {
           const socialCard = document.getElementById("social-media-card");
           if (socialCard) socialCard.style.display = "block";

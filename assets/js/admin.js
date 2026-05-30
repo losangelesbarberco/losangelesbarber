@@ -748,8 +748,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadAdminGallery() {
     if (!listAdminGallery) return;
     try {
-      const { data, error } = await supabase.from("settings").select("value").eq("id", "gallery_images").single();
-      if (error && error.code !== "PGRST116") throw error; // PGRST116 is not found (empty)
+      const { data, error } = await supabase.from("settings").select("value").eq("id", "gallery_images").maybeSingle();
+      if (error) throw error;
       
       galleryArray = data && data.value ? JSON.parse(data.value) : [];
       
