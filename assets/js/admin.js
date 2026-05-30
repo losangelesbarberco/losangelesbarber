@@ -29,10 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const statEarnings = document.getElementById("stat-earnings");
   const dateFilterInput = document.getElementById("date-filter");
 
-  // Formulario Perfil Barbero
   const formBarberProfile = document.getElementById("form-barber-profile");
   const editBioInput = document.getElementById("edit-bio");
-  const editPhotoInput = document.getElementById("edit-photo");
+  const editPhotoFile = document.getElementById("edit-photo_file");
+  const barberPreviewImg = document.getElementById("barber-preview-img");
+  const barberPreviewText = document.getElementById("barber-preview-text");
   const editSpecialtiesInput = document.getElementById("edit-specialties");
 
   // Formulario Gestionar Servicios (Super Admin)
@@ -159,9 +160,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Rellenar formulario de perfil de barbero
         editBioInput.value = barberProfile.bio || "";
-        editPhotoInput.value = barberProfile.photo_url || "";
         editSpecialtiesInput.value = barberProfile.specialties ? barberProfile.specialties.join(", ") : "";
-
+        if (barberProfile.photo_url) {
+          barberPreviewImg.src = barberProfile.photo_url;
+          barberPreviewImg.style.display = "block";
+          barberPreviewText.style.display = "none";
+        }
+        
         loadAppointments();
       } else {
         // Usuario autenticado pero sin rol de admin ni barbero
@@ -349,7 +354,6 @@ document.addEventListener("DOMContentLoaded", () => {
       btnSubmit.innerText = "Guardando...";
 
       const bio = editBioInput.value.trim();
-      const photoUrl = editPhotoInput.value.trim();
       // Separar especialidades por coma y limpiar espacios
       const specialties = editSpecialtiesInput.value
         .split(",")
@@ -357,17 +361,46 @@ document.addEventListener("DOMContentLoaded", () => {
         .filter(s => s.length > 0);
 
       try {
+        let finalPhotoUrl = barberProfile.photo_url;
+
+        // Si el usuario seleccionó una imagen nueva, subirla a 'logos' bucket
+        if (editPhotoFile && editPhotoFile.files.length > 0) {
+          btnSubmit.innerText = "Subiendo foto...";
+          const file = editPhotoFile.files[0];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `barber_${currentUserSession.user.id}_${Date.now()}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('logos')
+            .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+          if (uploadError) throw new Error("Error al subir foto: " + uploadError.message);
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('logos')
+            .getPublicUrl(fileName);
+
+          finalPhotoUrl = publicUrl;
+          
+          barberPreviewImg.src = finalPhotoUrl;
+          barberPreviewImg.style.display = "block";
+          barberPreviewText.style.display = "none";
+        }
+
         const { error } = await supabase
           .from("barbers")
           .update({
             bio,
-            photo_url: photoUrl,
+            photo_url: finalPhotoUrl,
             specialties
           })
           .eq("user_id", currentUserSession.user.id);
 
         if (error) throw error;
         alert("¡Perfil actualizado con éxito!");
+        
+        // Limpiar input file
+        if(editPhotoFile) editPhotoFile.value = "";
         
         // Recargar datos locales
         await loadUserDataAndRedirect();
@@ -411,14 +444,26 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
             <span class="service-price">$${parseFloat(service.price).toFixed(2)}</span>
-            <button class="btn btn-danger btn-small toggle-service-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${service.id}" data-active="${service.active}">
-              ${service.active ? 'Desactivar' : 'Activar'}
-            </button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-primary btn-small edit-service-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${service.id}">Editar</button>
+              <button class="btn btn-danger btn-small toggle-service-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${service.id}" data-active="${service.active}">
+                ${service.active ? 'Desactivar' : 'Activar'}
+              </button>
+              <button class="btn btn-small delete-service-btn" style="padding:4px 8px; font-size:0.75rem; background:transparent; border:1px solid #ff4d4d; color:#ff4d4d;" data-id="${service.id}">
+                Eliminar
+              </button>
+            </div>
           </div>
         `;
 
         const btnToggle = item.querySelector(".toggle-service-btn");
         btnToggle.addEventListener("click", () => toggleServiceActive(service.id, service.active));
+
+        const btnEdit = item.querySelector(".edit-service-btn");
+        btnEdit.addEventListener("click", () => editService(service));
+
+        const btnDelete = item.querySelector(".delete-service-btn");
+        btnDelete.addEventListener("click", () => deleteService(service.id));
 
         listAdminServices.appendChild(item);
       });
@@ -444,39 +489,80 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function editService(service) {
+    document.getElementById("service-id").value = service.id;
+    document.getElementById("service-name").value = service.name;
+    document.getElementById("service-price").value = service.price;
+    document.getElementById("service-duration").value = service.duration_minutes;
+    document.getElementById("service-desc").value = service.description || '';
+    
+    document.getElementById("btn-submit-service").innerText = "Actualizar Servicio";
+    document.getElementById("btn-cancel-service").style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function deleteService(serviceId) {
+    if (!confirm("¿Estás seguro de eliminar permanentemente este servicio? (Las citas existentes mantendrán el registro, pero el servicio no volverá a aparecer)")) return;
+    try {
+      const { error } = await supabase.from("services").delete().eq("id", serviceId);
+      if (error) throw error;
+      loadAdminServices();
+    } catch (err) {
+      alert("Error al eliminar servicio: " + err.message);
+    }
+  }
+
+  const btnCancelService = document.getElementById("btn-cancel-service");
+  if (btnCancelService) {
+    btnCancelService.addEventListener("click", () => {
+      document.getElementById("service-id").value = "";
+      formManageService.reset();
+      document.getElementById("btn-submit-service").innerText = "Crear Servicio";
+      btnCancelService.style.display = "none";
+    });
+  }
+
   if (formManageService) {
     formManageService.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const btnSubmit = formManageService.querySelector("button[type='submit']");
       btnSubmit.setAttribute("disabled", "true");
+      btnSubmit.innerText = "Guardando...";
 
+      const serviceId = document.getElementById("service-id").value;
       const name = document.getElementById("service-name").value.trim();
       const price = parseFloat(document.getElementById("service-price").value);
-      const duration = parseInt(document.getElementById("service-duration").value);
+      const duration_minutes = parseInt(document.getElementById("service-duration").value);
       const description = document.getElementById("service-desc").value.trim();
 
       try {
-        const { error } = await supabase
-          .from("services")
-          .insert([{
-            name,
-            price,
-            duration_minutes: duration,
-            description: description || null,
-            active: true
-          }]);
+        if (serviceId) {
+          const { error } = await supabase
+            .from("services")
+            .update({ name, price, duration_minutes, description })
+            .eq("id", serviceId);
+          if (error) throw error;
+          alert("Servicio actualizado exitosamente.");
+        } else {
+          const { error } = await supabase
+            .from("services")
+            .insert([{ name, price, duration_minutes, description, active: true }]);
+          if (error) throw error;
+          alert("Servicio creado exitosamente.");
+        }
 
-        if (error) throw error;
-
-        alert("Servicio creado exitosamente");
         formManageService.reset();
+        document.getElementById("service-id").value = "";
+        document.getElementById("btn-submit-service").innerText = "Crear Servicio";
+        if (btnCancelService) btnCancelService.style.display = "none";
         loadAdminServices();
       } catch (err) {
-        console.error("Error creando servicio:", err.message);
-        alert("Error al guardar el nuevo servicio: " + err.message);
+        console.error("Error creando/actualizando servicio:", err.message);
+        alert("Error al guardar el servicio: " + err.message);
       } finally {
         btnSubmit.removeAttribute("disabled");
+        btnSubmit.innerText = serviceId ? "Actualizar Servicio" : "Crear Servicio";
       }
     });
   }
@@ -506,17 +592,23 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="service-meta">${specText}</span>
           </div>
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <button class="btn btn-danger btn-small toggle-barber-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${barber.id}" data-active="${barber.active}">
-              ${barber.active ? 'Desactivar' : 'Activar'}
-            </button>
-            <button class="btn btn-small delete-barber-btn" style="padding:4px 8px; font-size:0.75rem; background:transparent; border:1px solid #ff4d4d; color:#ff4d4d;" data-id="${barber.id}">
-              Eliminar
-            </button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-primary btn-small edit-barber-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${barber.id}">Editar</button>
+              <button class="btn btn-danger btn-small toggle-barber-btn" style="padding:4px 8px; font-size:0.75rem;" data-id="${barber.id}" data-active="${barber.active}">
+                ${barber.active ? 'Desactivar' : 'Activar'}
+              </button>
+              <button class="btn btn-small delete-barber-btn" style="padding:4px 8px; font-size:0.75rem; background:transparent; border:1px solid #ff4d4d; color:#ff4d4d;" data-id="${barber.id}">
+                Eliminar
+              </button>
+            </div>
           </div>
         `;
         const btnToggle = item.querySelector(".toggle-barber-btn");
         btnToggle.addEventListener("click", () => toggleBarberActive(barber.id, barber.active));
         
+        const btnEdit = item.querySelector(".edit-barber-btn");
+        btnEdit.addEventListener("click", () => editBarber(barber));
+
         const btnDelete = item.querySelector(".delete-barber-btn");
         btnDelete.addEventListener("click", () => deleteBarber(barber.id));
 
@@ -549,13 +641,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function editBarber(barber) {
+    document.getElementById("barber-id").value = barber.id;
+    document.getElementById("barber-name").value = barber.name;
+    document.getElementById("barber-email").value = barber.login_email || '';
+    document.getElementById("barber-specialties").value = barber.specialties ? barber.specialties.join(", ") : "";
+    
+    // Deshabilitar credenciales para edición
+    document.getElementById("barber-email").setAttribute("disabled", "true");
+    document.getElementById("barber-password").setAttribute("disabled", "true");
+    document.getElementById("barber-password").removeAttribute("required");
+
+    document.getElementById("btn-submit-barber").innerText = "Actualizar Barbero";
+    document.getElementById("btn-cancel-barber").style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  const btnCancelBarber = document.getElementById("btn-cancel-barber");
+  if (btnCancelBarber) {
+    btnCancelBarber.addEventListener("click", () => {
+      document.getElementById("barber-id").value = "";
+      formManageBarber.reset();
+      
+      document.getElementById("barber-email").removeAttribute("disabled");
+      document.getElementById("barber-password").removeAttribute("disabled");
+      document.getElementById("barber-password").setAttribute("required", "true");
+      
+      document.getElementById("btn-submit-barber").innerText = "Crear Barbero";
+      btnCancelBarber.style.display = "none";
+    });
+  }
+
   if (formManageBarber) {
     formManageBarber.addEventListener("submit", async (e) => {
       e.preventDefault();
       const btnSubmit = formManageBarber.querySelector("button[type='submit']");
       btnSubmit.setAttribute("disabled", "true");
-      btnSubmit.innerText = "Registrando...";
+      btnSubmit.innerText = "Guardando...";
 
+      const barberId = document.getElementById("barber-id").value;
       const name = document.getElementById("barber-name").value.trim();
       const email = document.getElementById("barber-email").value.trim();
       const password = document.getElementById("barber-password").value;
@@ -563,40 +687,50 @@ document.addEventListener("DOMContentLoaded", () => {
       const specialties = specString ? specString.split(",").map(s => s.trim()) : [];
 
       try {
-        // Truco: Crear cliente secundario para no cerrar la sesión del admin
-        const tempClient = window.SupabaseLib.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
-          auth: { persistSession: false }
-        });
+        if (barberId) {
+          // Modo Edición
+          const { error } = await supabase.from("barbers").update({ name, specialties }).eq("id", barberId);
+          if (error) throw new Error("Error al actualizar: " + error.message);
+          alert("Barbero actualizado exitosamente.");
+        } else {
+          // Modo Creación
+          const tempClient = window.SupabaseLib.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
+            auth: { persistSession: false }
+          });
+          const { data: authData, error: authError } = await tempClient.auth.signUp({
+            email,
+            password
+          });
+          if (authError) throw new Error("Error al crear cuenta: " + authError.message);
+          
+          const newUserId = authData.user ? authData.user.id : null;
+          const { error } = await supabase.from("barbers").insert([{ 
+            user_id: newUserId,
+            login_email: email,
+            name, 
+            specialties, 
+            active: true 
+          }]);
+          if (error) throw new Error("Error al enlazar barbero: " + error.message);
+          alert("Barbero creado exitosamente con sus credenciales de acceso.");
+        }
 
-        // Registrar la cuenta en Supabase Auth
-        const { data: authData, error: authError } = await tempClient.auth.signUp({
-          email,
-          password
-        });
-
-        if (authError) throw new Error("Error al crear cuenta: " + authError.message);
-
-        const newUserId = authData.user ? authData.user.id : null;
-
-        // Insertar perfil del barbero en la tabla pública
-        const { error } = await supabase.from("barbers").insert([{ 
-          user_id: newUserId,
-          login_email: email,
-          name, 
-          specialties, 
-          active: true 
-        }]);
-
-        if (error) throw new Error("Error al enlazar barbero: " + error.message);
-        
-        alert("Barbero creado exitosamente con sus credenciales de acceso.");
         formManageBarber.reset();
+        document.getElementById("barber-id").value = "";
+        
+        // Restaurar estado de inputs
+        document.getElementById("barber-email").removeAttribute("disabled");
+        document.getElementById("barber-password").removeAttribute("disabled");
+        document.getElementById("barber-password").setAttribute("required", "true");
+        
+        if (btnCancelBarber) btnCancelBarber.style.display = "none";
+        
         loadAdminBarbers();
       } catch (err) {
         alert("Atención: " + err.message);
       } finally {
         btnSubmit.removeAttribute("disabled");
-        btnSubmit.innerText = "Crear Barbero";
+        btnSubmit.innerText = barberId ? "Actualizar Barbero" : "Crear Barbero";
       }
     });
   }

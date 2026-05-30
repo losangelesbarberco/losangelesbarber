@@ -100,6 +100,7 @@ title: Portal Barbería
       <form id="form-manage-service">
         <div class="form-group">
           <label class="form-label" for="service-name">Nombre del Servicio *</label>
+          <input type="hidden" id="service-id">
           <input class="form-control" type="text" id="service-name" required placeholder="Ej: Corte Degradado">
         </div>
         <div style="display:flex; gap:12px; margin-bottom:12px;">
@@ -116,7 +117,10 @@ title: Portal Barbería
           <label class="form-label" for="service-desc">Descripción (Opcional)</label>
           <input class="form-control" type="text" id="service-desc" placeholder="Detalle rápido del servicio">
         </div>
-        <button type="submit" class="btn btn-primary btn-small">Crear Servicio</button>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button type="submit" class="btn btn-primary btn-small" id="btn-submit-service">Crear Servicio</button>
+          <button type="button" class="btn btn-small" id="btn-cancel-service" style="display:none;">Cancelar Edición</button>
+        </div>
       </form>
     </div>
 
@@ -136,6 +140,7 @@ title: Portal Barbería
       <form id="form-manage-barber">
         <div class="form-group">
           <label class="form-label" for="barber-name">Nombre del Barbero *</label>
+          <input type="hidden" id="barber-id">
           <input class="form-control" type="text" id="barber-name" required placeholder="Ej: Carlos Gómez">
         </div>
         <div class="form-group">
@@ -150,7 +155,10 @@ title: Portal Barbería
           <label class="form-label" for="barber-specialties">Especialidades (separadas por coma)</label>
           <input class="form-control" type="text" id="barber-specialties" placeholder="Ej: Corte Clásico, Barba, Tintura">
         </div>
-        <button type="submit" class="btn btn-primary btn-small">Crear Barbero</button>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button type="submit" class="btn btn-primary btn-small" id="btn-submit-barber">Crear Barbero</button>
+          <button type="button" class="btn btn-small" id="btn-cancel-barber" style="display:none;">Cancelar Edición</button>
+        </div>
       </form>
     </div>
     <h3 style="margin-bottom: 12px;">Barberos Registrados</h3>
@@ -232,8 +240,15 @@ title: Portal Barbería
       
       <form id="form-barber-profile">
         <div class="form-group">
-          <label class="form-label" for="edit-photo">URL Foto de Perfil</label>
-          <input class="form-control" type="url" id="edit-photo" placeholder="https://unsplash.com/... (link directo)">
+          <label class="form-label" for="edit-photo_file">Foto de Perfil</label>
+          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+            <div id="barber-preview-container" style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-surface-elevated); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <span class="text-muted" style="font-size: 0.7rem;" id="barber-preview-text">Sin Foto</span>
+              <img id="barber-preview-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <input class="form-control" type="file" id="edit-photo_file" accept="image/png, image/jpeg, image/webp" style="flex: 1;">
+          </div>
+          <p class="service-meta" style="margin-top: 4px; font-size: 0.8rem;">Sube una imagen cuadrada para mostrarla a los clientes.</p>
         </div>
         <div class="form-group">
           <label class="form-label" for="edit-bio">Biografía / Presentación</label>
