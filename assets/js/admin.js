@@ -699,11 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.error("Error al cerrar sesión:", err.message);
     } finally {
-      currentUserSession = null;
-      userProfile = null;
-      barberProfile = null;
-      showLoginView();
-      if (formLogin) formLogin.reset();
+      window.location.reload();
     }
   }
 
