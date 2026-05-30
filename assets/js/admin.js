@@ -151,6 +151,11 @@ document.addEventListener("DOMContentLoaded", () => {
         panelSuperAdmin.style.display = "none";
         panelBarber.style.display = "block";
         adminTabContainer.style.display = "none"; // Ocultar pestañas de admin global
+        
+        // Bloqueo estricto de subpaneles de Super Admin
+        document.getElementById("tab-services").style.display = "none";
+        document.getElementById("tab-barbers").style.display = "none";
+        document.getElementById("tab-homeconfig").style.display = "none";
 
         // Rellenar formulario de perfil de barbero
         editBioInput.value = barberProfile.bio || "";
