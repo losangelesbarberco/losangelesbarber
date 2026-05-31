@@ -233,6 +233,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- 4. Carga y Gestión de Citas ---
   async function loadAppointments() {
+    loadPendingAppointments();
+
     listAppointments.innerHTML = "<p class='text-muted'>Cargando citas...</p>";
     const selectedDate = dateFilterInput.value;
 
@@ -344,6 +346,91 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.error("Error al cargar citas:", err.message);
       listAppointments.innerHTML = "<p class='text-danger'>Error al cargar las citas de la base de datos.</p>";
+    }
+  }
+
+  async function loadPendingAppointments() {
+    const pendingSection = document.getElementById("pending-appointments-section");
+    const listPending = document.getElementById("list-pending-appointments");
+    if (!pendingSection || !listPending) return;
+
+    try {
+      let query = supabase
+        .from("appointments")
+        .select(`
+          *,
+          barbers ( name ),
+          services ( name, price )
+        `)
+        .eq("status", "pending")
+        .order("appointment_date", { ascending: true })
+        .order("appointment_time", { ascending: true });
+
+      // Si es barbero, filtrar únicamente sus citas
+      if (!userProfile.is_admin && barberProfile) {
+        query = query.eq("barber_id", barberProfile.id);
+      }
+
+      const { data: pendingApps, error } = await query;
+      if (error) throw error;
+
+      if (!pendingApps || pendingApps.length === 0) {
+        pendingSection.style.display = "none";
+        return;
+      }
+
+      pendingSection.style.display = "block";
+      listPending.innerHTML = "";
+
+      pendingApps.forEach(app => {
+        const item = document.createElement("div");
+        item.className = "appointment-list-item pending";
+        item.style.borderColor = "var(--warning)";
+        
+        const price = app.services ? parseFloat(app.services.price) : 0;
+        const formattedTime = app.appointment_time.slice(0, 5);
+        const serviceName = app.services ? app.services.name : "Servicio Desconocido";
+        const barberName = app.barbers ? app.barbers.name : "Sin Asignar";
+
+        // Formatear la fecha
+        const rawDate = new Date(app.appointment_date + "T00:00:00");
+        const formattedDate = rawDate.toLocaleDateString("es-ES", { weekday: 'short', day: 'numeric', month: 'short' });
+
+        item.innerHTML = `
+          <div class="appointment-header">
+            <span class="appointment-time-tag" style="color: var(--warning);">${formattedDate} - ${formattedTime} hs</span>
+            <span class="appointment-status-tag status-pending">Por Confirmar</span>
+          </div>
+          <div class="appointment-details">
+            <p><strong>Cliente:</strong> ${app.client_name} (${app.client_phone})</p>
+            ${app.client_email ? `<p><strong>Email:</strong> ${app.client_email}</p>` : ''}
+            <p><strong>Servicio:</strong> ${serviceName} ($${Number(price).toLocaleString('es-CO')})</p>
+            ${userProfile.is_admin ? `<p><strong>Barbero:</strong> ${barberName}</p>` : ''}
+          </div>
+          <div class="appointment-actions">
+            <button class="btn btn-primary btn-small btn-accept" data-id="${app.id}">Aceptar</button>
+            <button class="btn btn-danger btn-small btn-cancel" data-id="${app.id}">Cancelar</button>
+          </div>
+        `;
+
+        // Listeners
+        const btnAccept = item.querySelector(".btn-accept");
+        if (btnAccept) {
+          btnAccept.addEventListener("click", () => updateAppointmentStatus(app.id, "scheduled"));
+        }
+
+        const btnCancel = item.querySelector(".btn-cancel");
+        if (btnCancel) {
+          btnCancel.addEventListener("click", () => updateAppointmentStatus(app.id, "cancelled"));
+        }
+
+        listPending.appendChild(item);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+
+    } catch (err) {
+      console.error("Error al cargar citas pendientes:", err.message);
     }
   }
 
