@@ -393,6 +393,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const bubble = document.createElement("div");
       bubble.className = "date-bubble";
+      if (bookingState.selectedDate === dateStr) {
+        bubble.classList.add("selected");
+      }
       bubble.dataset.date = dateStr;
       bubble.innerHTML = `
         <span class="date-bubble-dayname">${dayName}</span>
@@ -417,6 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Set min date to today
       const today = new Date().toISOString().split("T")[0];
       customDateInput.min = today;
+      customDateInput.value = bookingState.selectedDate || "";
       
       customDateInput.addEventListener("change", (e) => {
         const selectedDate = e.target.value;
@@ -515,7 +519,11 @@ document.addEventListener("DOMContentLoaded", () => {
       loadBarbers();
     } else if (newStep.pane === "pane-time") {
       buildDateSelector();
-      timeGridContainer.innerHTML = "<p class='text-muted'>Por favor selecciona una fecha arriba.</p>";
+      if (bookingState.selectedDate) {
+        loadAvailableTimes();
+      } else {
+        timeGridContainer.innerHTML = "<p class='text-muted'>Por favor selecciona una fecha arriba.</p>";
+      }
     } else if (newStep.pane === "pane-details") {
       // Mostrar resumen en el formulario
       const rawDate = new Date(bookingState.selectedDate + "T00:00:00");
