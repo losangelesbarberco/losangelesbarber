@@ -56,6 +56,7 @@ title: Portal Barbería
     <button class="admin-tab-btn" data-tab="tab-barbers">Barberos</button>
     <button class="admin-tab-btn" data-tab="tab-gallery">Galería</button>
     <button class="admin-tab-btn" data-tab="tab-homeconfig">Inicio</button>
+    <button class="admin-tab-btn" data-tab="tab-reports">Reportes</button>
   </div>
 
   <!-- ==========================================
@@ -268,6 +269,106 @@ title: Portal Barbería
         </div>
         <button type="submit" class="btn btn-primary btn-small">Guardar Configuración</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SUBPANE 5: REPORTES DE PRODUCCIÓN (Solo Super Admin)
+       ========================================== -->
+  <div class="admin-subpane" id="tab-reports">
+    <div class="card-glass" style="margin-bottom:20px;">
+      <h3 style="margin-bottom:12px;">Filtros de Reportes</h3>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="report-barber">Barbero</label>
+          <select class="form-control" id="report-barber" style="width:100%; height:45px; background:var(--bg-surface); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:var(--border-radius-sm); padding:0 12px;">
+            <option value="all">Todos los Barberos</option>
+            <!-- Inyectados dinámicamente -->
+          </select>
+        </div>
+        
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="report-period">Período</label>
+          <select class="form-control" id="report-period" style="width:100%; height:45px; background:var(--bg-surface); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:var(--border-radius-sm); padding:0 12px;">
+            <option value="today">Hoy</option>
+            <option value="week">Esta Semana (Últimos 7 días)</option>
+            <option value="month">Este Mes</option>
+            <option value="custom">Rango Personalizado</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Contenedor de Fechas Personalizadas (Oculto por defecto) -->
+      <div id="report-custom-dates" style="display:none; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05);">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="report-start-date">Fecha Inicio</label>
+          <input class="form-control" type="date" id="report-start-date" style="color-scheme: dark;">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="report-end-date">Fecha Fin</label>
+          <input class="form-control" type="date" id="report-end-date" style="color-scheme: dark;">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; align-items:center; margin-top:20px;">
+        <button type="button" class="btn btn-primary btn-small" id="btn-generate-report" style="width:auto; padding: 10px 20px;">
+          Generar Reporte <i data-lucide="bar-chart-2" style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-left:4px;"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Indicadores / Stats de Reporte -->
+    <div class="stats-grid" style="margin-bottom: 24px;">
+      <div class="stat-card">
+        <span class="stat-label">Total Citas</span>
+        <div class="stat-val" id="report-stat-count">0</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Completadas</span>
+        <div class="stat-val" id="report-stat-completed" style="color:var(--success);">0</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Canceladas</span>
+        <div class="stat-val" id="report-stat-cancelled" style="color:var(--danger);">0</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Total Producido</span>
+        <div class="stat-val" id="report-stat-earnings" style="color:var(--primary);">$0</div>
+      </div>
+    </div>
+
+    <!-- Tasa de asistencia general -->
+    <div class="card" style="padding: 12px 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-secondary);">Tasa de Asistencia (Cumplimiento):</span>
+      <span id="report-stat-attendance" style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">0%</span>
+    </div>
+
+    <!-- Tabla de Desglose por Barbero -->
+    <h3 style="margin-bottom: 12px;" id="report-table-title">Desglose de Producción</h3>
+    <div class="card" style="padding: 16px; overflow-x: auto; margin-bottom: 24px;">
+      <table class="report-table" style="width: 100%; border-collapse: collapse; min-width: 500px;">
+        <thead>
+          <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); text-align: left; color:var(--text-secondary); font-size: 0.9rem;">
+            <th style="padding: 12px 8px;">Barbero</th>
+            <th style="padding: 12px 8px; text-align: center;">Citas Completadas</th>
+            <th style="padding: 12px 8px; text-align: center;">Citas Canceladas</th>
+            <th style="padding: 12px 8px; text-align: center;">Citas Agendadas</th>
+            <th style="padding: 12px 8px; text-align: right;">Total Producido</th>
+          </tr>
+        </thead>
+        <tbody id="report-table-body">
+          <!-- Inyectado dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Listado Detallado de Citas (Visible al filtrar barbero) -->
+    <div id="report-details-container" style="display: none; margin-bottom: 100px;">
+      <h3 style="margin-bottom: 12px;">Historial de Citas</h3>
+      <div id="report-details-list">
+        <!-- Inyectado dinámicamente -->
+      </div>
     </div>
   </div>
 

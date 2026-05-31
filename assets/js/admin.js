@@ -68,6 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadAdminGallery();
       } else if (targetId === "tab-homeconfig") {
         loadAdminHomeConfig();
+      } else if (targetId === "tab-reports") {
+        initReportsTab();
       }
     });
   });
@@ -995,6 +997,323 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       handleLogout();
     });
+  }
+
+  // --- 11. Módulo de Reportes de Producción de Barberos (Super Admin) ---
+  let isReportsTabInitialized = false;
+
+  async function initReportsTab() {
+    const reportBarberSelect = document.getElementById("report-barber");
+    const reportPeriodSelect = document.getElementById("report-period");
+    const reportCustomDates = document.getElementById("report-custom-dates");
+    const btnGenerateReport = document.getElementById("btn-generate-report");
+
+    if (!reportBarberSelect || !reportPeriodSelect || !reportCustomDates || !btnGenerateReport) return;
+
+    // Solo agregar event listeners una vez
+    if (!isReportsTabInitialized) {
+      reportPeriodSelect.addEventListener("change", (e) => {
+        if (e.target.value === "custom") {
+          reportCustomDates.style.display = "grid";
+        } else {
+          reportCustomDates.style.display = "none";
+        }
+      });
+
+      btnGenerateReport.addEventListener("click", (e) => {
+        e.preventDefault();
+        generateReport();
+      });
+
+      isReportsTabInitialized = true;
+    }
+
+    // Inicializar fechas del rango personalizado con el día de hoy
+    const todayStr = new Date().toISOString().split("T")[0];
+    document.getElementById("report-start-date").value = todayStr;
+    document.getElementById("report-end-date").value = todayStr;
+
+    // Cargar barberos activos en el select dinámico
+    try {
+      const { data: barbers, error } = await supabase
+        .from("barbers")
+        .select("id, name")
+        .eq("active", true);
+
+      if (error) throw error;
+
+      // Limpiar opciones previas manteniendo "Todos los Barberos"
+      reportBarberSelect.innerHTML = `<option value="all">Todos los Barberos</option>`;
+      if (barbers) {
+        barbers.forEach(barber => {
+          const opt = document.createElement("option");
+          opt.value = barber.id;
+          opt.innerText = barber.name;
+          reportBarberSelect.appendChild(opt);
+        });
+      }
+    } catch (err) {
+      console.error("Error cargando barberos para reportes:", err.message);
+    }
+
+    // Generar reporte inicial ("Hoy") automáticamente al entrar a la pestaña
+    generateReport();
+  }
+
+  async function generateReport() {
+    const barberId = document.getElementById("report-barber").value;
+    const period = document.getElementById("report-period").value;
+    const btnSubmit = document.getElementById("btn-generate-report");
+
+    const statCount = document.getElementById("report-stat-count");
+    const statCompleted = document.getElementById("report-stat-completed");
+    const statCancelled = document.getElementById("report-stat-cancelled");
+    const statEarnings = document.getElementById("report-stat-earnings");
+    const statAttendance = document.getElementById("report-stat-attendance");
+    const tableBody = document.getElementById("report-table-body");
+    const detailsContainer = document.getElementById("report-details-container");
+    const detailsList = document.getElementById("report-details-list");
+    const tableTitle = document.getElementById("report-table-title");
+
+    if (!statCount || !statCompleted || !statCancelled || !statEarnings || !statAttendance || !tableBody || !detailsContainer || !detailsList) return;
+
+    btnSubmit.setAttribute("disabled", "true");
+    const originalText = btnSubmit.innerHTML;
+    btnSubmit.innerHTML = `<i data-lucide="loader" class="spin" style="width:16px; height:16px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Generando...`;
+    if (window.lucide) window.lucide.createIcons();
+
+    // Calcular fechas startDate y endDate
+    let startDate = "";
+    let endDate = "";
+    const today = new Date();
+
+    if (period === "today") {
+      const todayStr = today.toISOString().split("T")[0];
+      startDate = todayStr;
+      endDate = todayStr;
+    } else if (period === "week") {
+      const lastWeek = new Date();
+      lastWeek.setDate(today.getDate() - 7);
+      startDate = lastWeek.toISOString().split("T")[0];
+      endDate = today.toISOString().split("T")[0];
+    } else if (period === "month") {
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      startDate = `${year}-${month}-01`;
+      endDate = today.toISOString().split("T")[0];
+    } else if (period === "custom") {
+      startDate = document.getElementById("report-start-date").value;
+      endDate = document.getElementById("report-end-date").value;
+      if (!startDate || !endDate) {
+        alert("Por favor ingresa ambas fechas para el rango personalizado.");
+        btnSubmit.removeAttribute("disabled");
+        btnSubmit.innerHTML = originalText;
+        return;
+      }
+    }
+
+    try {
+      // Consultar citas en el rango
+      let query = supabase
+        .from("appointments")
+        .select(`
+          *,
+          barbers ( id, name ),
+          services ( name, price )
+        `)
+        .gte("appointment_date", startDate)
+        .lte("appointment_date", endDate);
+
+      // Si se filtra por un barbero específico
+      if (barberId !== "all") {
+        query = query.eq("barber_id", barberId);
+      }
+
+      const { data: appointments, error } = await query;
+      if (error) throw error;
+
+      // Variables generales de conteo
+      let totalCitas = appointments.length;
+      let completadasCount = 0;
+      let canceladasCount = 0;
+      let agendadasCount = 0;
+      let totalRecaudado = 0;
+
+      // Estructura para agrupar por barbero
+      const barberStats = {};
+
+      // Primero, poblar la lista de barberos del select
+      const barberOptions = Array.from(document.getElementById("report-barber").options);
+      barberOptions.forEach(opt => {
+        if (opt.value !== "all") {
+          if (barberId !== "all" && opt.value !== barberId) return;
+
+          barberStats[opt.value] = {
+            name: opt.innerText,
+            completed: 0,
+            cancelled: 0,
+            scheduled: 0,
+            totalEarnings: 0
+          };
+        }
+      });
+
+      // Procesar citas
+      appointments.forEach(app => {
+        const appBarberId = app.barber_id;
+        const appStatus = app.status;
+        const price = app.services ? parseFloat(app.services.price) : 0;
+
+        if (appBarberId && !barberStats[appBarberId]) {
+          barberStats[appBarberId] = {
+            name: app.barbers ? app.barbers.name : "Sin Asignar",
+            completed: 0,
+            cancelled: 0,
+            scheduled: 0,
+            totalEarnings: 0
+          };
+        }
+
+        const statsObj = appBarberId ? barberStats[appBarberId] : null;
+
+        if (appStatus === "completed") {
+          completadasCount++;
+          totalRecaudado += price;
+          if (statsObj) {
+            statsObj.completed++;
+            statsObj.totalEarnings += price;
+          }
+        } else if (appStatus === "cancelled") {
+          canceladasCount++;
+          if (statsObj) statsObj.cancelled++;
+        } else {
+          agendadasCount++;
+          if (statsObj) statsObj.scheduled++;
+        }
+      });
+
+      // Actualizar KPIs
+      statCount.innerText = totalCitas;
+      statCompleted.innerText = completadasCount;
+      statCancelled.innerText = canceladasCount;
+      statEarnings.innerText = `$${Number(totalRecaudado).toLocaleString('es-CO')}`;
+
+      // Calcular tasa de asistencia
+      const totalFinalizadas = completadasCount + canceladasCount;
+      const attendancePercent = totalFinalizadas > 0 
+        ? Math.round((completadasCount / totalFinalizadas) * 100) 
+        : 0;
+      statAttendance.innerText = `${attendancePercent}%`;
+
+      // Renderizar tabla
+      tableBody.innerHTML = "";
+      
+      let grandTotalCompleted = 0;
+      let grandTotalCancelled = 0;
+      let grandTotalScheduled = 0;
+      let grandTotalEarnings = 0;
+
+      Object.keys(barberStats).forEach(bId => {
+        const stats = barberStats[bId];
+        const row = document.createElement("tr");
+
+        grandTotalCompleted += stats.completed;
+        grandTotalCancelled += stats.cancelled;
+        grandTotalScheduled += stats.scheduled;
+        grandTotalEarnings += stats.totalEarnings;
+
+        row.innerHTML = `
+          <td style="padding: 12px 8px; font-weight: 500;">${stats.name}</td>
+          <td style="padding: 12px 8px; text-align: center;">${stats.completed}</td>
+          <td style="padding: 12px 8px; text-align: center; color: ${stats.cancelled > 0 ? 'var(--danger)' : 'var(--text-secondary)'};">${stats.cancelled}</td>
+          <td style="padding: 12px 8px; text-align: center; color: ${stats.scheduled > 0 ? 'var(--primary)' : 'var(--text-secondary)'};">${stats.scheduled}</td>
+          <td style="padding: 12px 8px; text-align: right; font-weight: 600; color: var(--primary);">$${Number(stats.totalEarnings).toLocaleString('es-CO')}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      if (barberId === "all" && Object.keys(barberStats).length > 0) {
+        const tfoot = document.createElement("tr");
+        tfoot.style.cssText = "border-top: 2px solid rgba(255,255,255,0.1); font-weight: 700; background-color: rgba(255, 255, 255, 0.01);";
+        tfoot.innerHTML = `
+          <td style="padding: 14px 8px; color: var(--text-primary);">TOTAL GENERAL</td>
+          <td style="padding: 14px 8px; text-align: center; color: var(--success);">${grandTotalCompleted}</td>
+          <td style="padding: 14px 8px; text-align: center; color: var(--danger);">${grandTotalCancelled}</td>
+          <td style="padding: 14px 8px; text-align: center; color: var(--primary);">${grandTotalScheduled}</td>
+          <td style="padding: 14px 8px; text-align: right; color: var(--primary);">$${Number(grandTotalEarnings).toLocaleString('es-CO')}</td>
+        `;
+        tableBody.appendChild(tfoot);
+      }
+
+      if (Object.keys(barberStats).length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-muted" style="text-align: center; padding: 20px;">No hay datos de barberos para mostrar.</td></tr>`;
+      }
+
+      // Renderizar listado de detalles (si se elige un barbero específico)
+      if (barberId !== "all") {
+        tableTitle.innerText = "Resumen del Barbero";
+        detailsContainer.style.display = "block";
+        detailsList.innerHTML = "";
+
+        if (appointments.length === 0) {
+          detailsList.innerHTML = "<p class='text-muted' style='text-align: center; padding: 20px 0;'>No se encontraron citas en este período para el barbero.</p>";
+        } else {
+          appointments.sort((a, b) => {
+            const dateA = new Date(a.appointment_date + "T" + a.appointment_time);
+            const dateB = new Date(b.appointment_date + "T" + b.appointment_time);
+            return dateB - dateA;
+          });
+
+          appointments.forEach(app => {
+            const rowItem = document.createElement("div");
+            rowItem.className = `appointment-list-item ${app.status}`;
+            
+            const price = app.services ? parseFloat(app.services.price) : 0;
+            const formattedPrice = Number(price).toLocaleString('es-CO');
+            const serviceName = app.services ? app.services.name : "Servicio Desconocido";
+            const rawDate = new Date(app.appointment_date + "T00:00:00");
+            const formattedDate = rawDate.toLocaleDateString("es-ES", { day: 'numeric', month: 'short', year: 'numeric' });
+            const formattedTime = app.appointment_time.slice(0, 5);
+
+            let statusText = "Agendado";
+            let statusClass = "status-scheduled";
+            if (app.status === "completed") {
+              statusText = "Completado";
+              statusClass = "status-completed";
+            } else if (app.status === "cancelled") {
+              statusText = "Cancelado";
+              statusClass = "status-cancelled";
+            }
+
+            rowItem.innerHTML = `
+              <div class="appointment-header">
+                <span class="appointment-time-tag" style="background: rgba(255,255,255,0.05); color:#fff; font-size:0.8rem; padding:4px 8px; border-radius:4px;">
+                  ${formattedDate} • ${formattedTime} hs
+                </span>
+                <span class="appointment-status-tag ${statusClass}">${statusText}</span>
+              </div>
+              <div class="appointment-details" style="margin-top: 10px;">
+                <p><strong>Cliente:</strong> ${app.client_name} (${app.client_phone})</p>
+                ${app.client_email ? `<p><strong>Email:</strong> ${app.client_email}</p>` : ''}
+                <p><strong>Servicio:</strong> ${serviceName} ($${formattedPrice})</p>
+              </div>
+            `;
+            detailsList.appendChild(rowItem);
+          });
+        }
+      } else {
+        tableTitle.innerText = "Desglose de Producción";
+        detailsContainer.style.display = "none";
+      }
+
+    } catch (err) {
+      console.error("Error al generar reporte:", err.message);
+      alert("Error al cargar datos del reporte: " + err.message);
+    } finally {
+      btnSubmit.removeAttribute("disabled");
+      btnSubmit.innerHTML = originalText;
+      if (window.lucide) window.lucide.createIcons();
+    }
   }
 
 });
