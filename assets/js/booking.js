@@ -660,7 +660,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const btnWa = document.getElementById("btn-whatsapp-confirm");
         if (btnWa && window.shopWhatsappNumber && window.shopWhatsappNumber.trim() !== "") {
           const cleanPhone = window.shopWhatsappNumber.replace(/\D/g, "");
-          const appointmentId = data && data[0] ? data[0].id.substring(0, 8).toUpperCase() : "";
+          const appointmentId = data && data[0] ? String(data[0].id).substring(0, 8).toUpperCase() : "";
           const msg = `¡Hola! Acabo de agendar una cita en Los Ángeles Barber.
 
 Detalles de la cita:
