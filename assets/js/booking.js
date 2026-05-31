@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  loadHomeSettings();
+  // loadHomeSettings() se llamará dentro del inicializador initApp() al final del archivo.
 
   // --- Cargar Equipo (Barberos) ---
   async function loadTeam() {
@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error cargando equipo:", err.message);
     }
   }
-  loadTeam();
+  // loadTeam() se llamará dentro del inicializador initApp() al final del archivo.
 
   // --- 2. Carga de Datos desde Supabase (Reservas) ---
   async function loadServices() {
@@ -712,5 +712,24 @@ document.addEventListener("DOMContentLoaded", () => {
   initLightboxEvents();
   // Llamada inicial por si hay imágenes precargadas
   window.refreshGalleryLightbox();
+
+  // --- Inicialización de la Aplicación con cargador de pantalla (loader) ---
+  async function initApp() {
+    try {
+      const promises = [loadHomeSettings(), loadTeam()];
+      if (window.location.hash === "#booking") {
+        promises.push(loadServices());
+      }
+      await Promise.all(promises);
+    } catch (err) {
+      console.error("Error en la inicialización:", err);
+    } finally {
+      if (typeof window.hidePageLoader === "function") {
+        window.hidePageLoader();
+      }
+    }
+  }
+
+  initApp();
 
 });

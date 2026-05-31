@@ -85,10 +85,16 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadUserDataAndRedirect();
       } else {
         showLoginView();
+        if (typeof window.hidePageLoader === 'function') {
+          window.hidePageLoader();
+        }
       }
     } catch (err) {
       console.error("Error comprobando sesión:", err.message);
       showLoginView();
+      if (typeof window.hidePageLoader === 'function') {
+        window.hidePageLoader();
+      }
     }
   }
 
@@ -144,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         panelBarber.style.display = "none";
         adminTabContainer.style.display = "flex";
 
-        loadAppointments();
+        await loadAppointments();
       } else if (barberProfile) {
         // --- Modo Barbero ---
         userGreeting.innerText = `Hola, ${barberProfile.name}`;
@@ -169,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
           barberPreviewText.style.display = "none";
         }
         
-        loadAppointments();
+        await loadAppointments();
       } else {
         // Usuario autenticado pero sin rol de admin ni barbero
         userGreeting.innerText = "Usuario no autorizado";
@@ -184,6 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error cargando perfil del usuario:", err.message);
       alert("Error al cargar perfil de usuario: " + err.message);
       handleLogout();
+    } finally {
+      if (typeof window.hidePageLoader === 'function') {
+        window.hidePageLoader();
+      }
     }
   }
 
