@@ -628,7 +628,7 @@ document.addEventListener("DOMContentLoaded", () => {
               service_id: bookingState.serviceId,
               appointment_date: bookingState.selectedDate,
               appointment_time: bookingState.selectedTime + ":00", // Añadir segundos para formato TIME
-              status: "scheduled"
+              status: "pending"
             }
           ])
           .select();
@@ -640,18 +640,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const formattedDate = rawDate.toLocaleDateString("es-ES", { weekday: 'long', day: 'numeric', month: 'long' });
 
         confirmationDetails.innerHTML = `
-          <div class="card-glass" style="border-color:var(--success); text-align:center;">
-            <div style="width:50px; height:50px; border-radius:50%; background:rgba(16,185,129,0.15); display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
-              <i data-lucide="check" style="stroke:var(--success); width:30px; height:30px;"></i>
+          <div class="card-glass" style="border-color:var(--warning); text-align:center;">
+            <div style="width:50px; height:50px; border-radius:50%; background:rgba(245,158,11,0.15); display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+              <i data-lucide="clock" style="stroke:var(--warning); width:30px; height:30px;"></i>
             </div>
-            <h3 style="color:var(--success); margin-bottom:8px;">¡Turno Agendado!</h3>
-            <p class="service-meta" style="margin-bottom:16px;">Tu cita se ha registrado exitosamente. Te esperamos.</p>
+            <h3 style="color:var(--warning); margin-bottom:8px;">¡Turno Solicitado!</h3>
+            <p class="service-meta" style="margin-bottom:16px;">Tu cita ha sido registrada. El barbero te confirmará si se acepta la reserva.</p>
             <div style="text-align:left; border-top:1px solid rgba(255,255,255,0.05); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
               <p class="service-meta"><strong style="color:#fff">Cliente:</strong> ${name}</p>
               <p class="service-meta"><strong style="color:#fff">Servicio:</strong> ${bookingState.serviceName}</p>
               <p class="service-meta"><strong style="color:#fff">Barbero:</strong> ${bookingState.barberName}</p>
               <p class="service-meta"><strong style="color:#fff">Fecha:</strong> ${formattedDate}</p>
               <p class="service-meta"><strong style="color:#fff">Hora:</strong> ${bookingState.selectedTime} hs</p>
+              <p class="service-meta"><strong style="color:#fff">Estado:</strong> <span class="appointment-status-tag status-pending">Por Confirmar</span></p>
             </div>
           </div>
         `;
@@ -661,7 +662,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btnWa && window.shopWhatsappNumber && window.shopWhatsappNumber.trim() !== "") {
           const cleanPhone = window.shopWhatsappNumber.replace(/\D/g, "");
           const appointmentId = data && data[0] ? String(data[0].id).substring(0, 8).toUpperCase() : "";
-          const msg = `¡Hola! Acabo de agendar una cita en Los Ángeles Barber.
+          const msg = `¡Hola! Acabo de solicitar una cita en Los Ángeles Barber.
 
 Detalles de la cita:
 • Referencia: #${appointmentId}
@@ -670,6 +671,7 @@ Detalles de la cita:
 • Barbero: ${bookingState.barberName}
 • Fecha: ${formattedDate}
 • Hora: ${bookingState.selectedTime} hs
+• Estado: Pendiente de Confirmación
 
 Por favor confirmen mi turno. ¡Muchas gracias!`;
           btnWa.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;

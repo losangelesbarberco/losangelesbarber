@@ -283,9 +283,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const barberName = app.barbers ? app.barbers.name : "Sin Asignar";
 
         // Traducir etiquetas de estado
-        let statusText = "Agendado";
+        let statusText = "Confirmado";
         let statusClass = "status-scheduled";
-        if (app.status === "completed") {
+        if (app.status === "pending") {
+          statusText = "Por Confirmar";
+          statusClass = "status-pending";
+        } else if (app.status === "completed") {
           statusText = "Completado";
           statusClass = "status-completed";
         } else if (app.status === "cancelled") {
@@ -304,7 +307,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <p><strong>Servicio:</strong> ${serviceName} ($${Number(price).toLocaleString('es-CO')})</p>
             ${userProfile.is_admin ? `<p><strong>Barbero:</strong> ${barberName}</p>` : ''}
           </div>
-          ${app.status === 'scheduled' ? `
+          ${app.status === 'pending' ? `
+            <div class="appointment-actions">
+              <button class="btn btn-primary btn-small btn-accept" data-id="${app.id}">Aceptar</button>
+              <button class="btn btn-danger btn-small btn-cancel" data-id="${app.id}">Cancelar</button>
+            </div>
+          ` : app.status === 'scheduled' ? `
             <div class="appointment-actions">
               <button class="btn btn-primary btn-small btn-complete" data-id="${app.id}">Completar</button>
               <button class="btn btn-danger btn-small btn-cancel" data-id="${app.id}">Cancelar</button>
@@ -313,6 +321,11 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         // Listeners para acciones
+        const btnAccept = item.querySelector(".btn-accept");
+        if (btnAccept) {
+          btnAccept.addEventListener("click", () => updateAppointmentStatus(app.id, "scheduled"));
+        }
+
         const btnComplete = item.querySelector(".btn-complete");
         if (btnComplete) {
           btnComplete.addEventListener("click", () => updateAppointmentStatus(app.id, "completed"));
@@ -340,7 +353,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function updateAppointmentStatus(appointmentId, newStatus) {
-    if (!confirm(`¿Estás seguro de marcar esta cita como ${newStatus === 'completed' ? 'completada' : 'cancelada'}?`)) return;
+    let confirmMsg = `¿Estás seguro de actualizar el estado de esta cita?`;
+    if (newStatus === 'scheduled') {
+      confirmMsg = `¿Estás seguro de confirmar y aceptar esta cita?`;
+    } else if (newStatus === 'completed') {
+      confirmMsg = `¿Estás seguro de marcar esta cita como completada?`;
+    } else if (newStatus === 'cancelled') {
+      confirmMsg = `¿Estás seguro de cancelar esta cita?`;
+    }
+
+    if (!confirm(confirmMsg)) return;
 
     try {
       const { error } = await supabase
@@ -1275,9 +1297,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const formattedDate = rawDate.toLocaleDateString("es-ES", { day: 'numeric', month: 'short', year: 'numeric' });
             const formattedTime = app.appointment_time.slice(0, 5);
 
-            let statusText = "Agendado";
+            let statusText = "Confirmado";
             let statusClass = "status-scheduled";
-            if (app.status === "completed") {
+            if (app.status === "pending") {
+              statusText = "Por Confirmar";
+              statusClass = "status-pending";
+            } else if (app.status === "completed") {
               statusText = "Completado";
               statusClass = "status-completed";
             } else if (app.status === "cancelled") {
