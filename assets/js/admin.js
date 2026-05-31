@@ -74,26 +74,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // --- Sub-pestañas Internas de Citas (Por Confirmar vs Agenda) ---
+  // --- Sub-pestañas Internas de Citas (Mi Perfil vs Por Confirmar vs Agenda) ---
+  const btnSubtabProfile = document.getElementById("btn-subtab-profile");
   const btnSubtabPending = document.getElementById("btn-subtab-pending");
   const btnSubtabAgenda = document.getElementById("btn-subtab-agenda");
+  
+  const paneProfile = document.getElementById("panel-barber");
   const panePending = document.getElementById("subtab-pane-pending");
   const paneAgenda = document.getElementById("subtab-pane-agenda");
 
-  if (btnSubtabPending && btnSubtabAgenda && panePending && paneAgenda) {
+  if (btnSubtabProfile && btnSubtabPending && btnSubtabAgenda && paneProfile && panePending && paneAgenda) {
+    btnSubtabProfile.addEventListener("click", (e) => {
+      e.preventDefault();
+      btnSubtabProfile.classList.add("active");
+      btnSubtabPending.classList.remove("active");
+      btnSubtabAgenda.classList.remove("active");
+      paneProfile.style.display = "block";
+      panePending.style.display = "none";
+      paneAgenda.style.display = "none";
+    });
+
     btnSubtabPending.addEventListener("click", (e) => {
       e.preventDefault();
       btnSubtabPending.classList.add("active");
+      btnSubtabProfile.classList.remove("active");
       btnSubtabAgenda.classList.remove("active");
       panePending.style.display = "block";
+      paneProfile.style.display = "none";
       paneAgenda.style.display = "none";
     });
 
     btnSubtabAgenda.addEventListener("click", (e) => {
       e.preventDefault();
       btnSubtabAgenda.classList.add("active");
+      btnSubtabProfile.classList.remove("active");
       btnSubtabPending.classList.remove("active");
       paneAgenda.style.display = "block";
+      paneProfile.style.display = "none";
       panePending.style.display = "none";
     });
   }
@@ -173,8 +190,18 @@ document.addEventListener("DOMContentLoaded", () => {
         userRoleTag.className = "appointment-status-tag status-scheduled";
 
         panelSuperAdmin.style.display = "block";
-        panelBarber.style.display = "none";
         adminTabContainer.style.display = "flex";
+
+        // Ocultar pestaña de Perfil y activar Solicitudes por defecto
+        if (btnSubtabProfile) btnSubtabProfile.style.display = "none";
+        if (btnSubtabPending && btnSubtabAgenda && paneProfile && panePending && paneAgenda) {
+          btnSubtabPending.classList.add("active");
+          btnSubtabAgenda.classList.remove("active");
+          btnSubtabProfile.classList.remove("active");
+          panePending.style.display = "block";
+          paneAgenda.style.display = "none";
+          paneProfile.style.display = "none";
+        }
 
         await loadAppointments();
       } else if (barberProfile) {
@@ -184,7 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
         userRoleTag.className = "appointment-status-tag status-completed";
 
         panelSuperAdmin.style.display = "none";
-        panelBarber.style.display = "block";
         adminTabContainer.style.display = "none"; // Ocultar pestañas de admin global
 
         // Bloqueo estricto de subpaneles de Super Admin
@@ -199,6 +225,17 @@ document.addEventListener("DOMContentLoaded", () => {
           barberPreviewImg.src = barberProfile.photo_url;
           barberPreviewImg.style.display = "block";
           barberPreviewText.style.display = "none";
+        }
+
+        // Mostrar pestaña de Perfil y activarla por defecto ("de primero")
+        if (btnSubtabProfile && btnSubtabPending && btnSubtabAgenda && paneProfile && panePending && paneAgenda) {
+          btnSubtabProfile.style.display = "block";
+          btnSubtabProfile.classList.add("active");
+          btnSubtabPending.classList.remove("active");
+          btnSubtabAgenda.classList.remove("active");
+          paneProfile.style.display = "block";
+          panePending.style.display = "none";
+          paneAgenda.style.display = "none";
         }
 
         await loadAppointments();

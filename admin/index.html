@@ -66,8 +66,40 @@ title: Portal Barbería
     
     <!-- Selector de Sub-pestañas para Citas -->
     <div class="admin-tab-bar" style="margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; gap: 8px;">
+      <button class="admin-subtab-btn" id="btn-subtab-profile" style="font-size: 0.9rem; padding: 10px; flex: 1; display: none;">Mi Perfil</button>
       <button class="admin-subtab-btn active" id="btn-subtab-pending" style="font-size: 0.9rem; padding: 10px; flex: 1;">Solicitudes por Confirmar</button>
       <button class="admin-subtab-btn" id="btn-subtab-agenda" style="font-size: 0.9rem; padding: 10px; flex: 1;">Agenda / Citas Agendadas</button>
+    </div>
+
+    <!-- Contenedor Sub-pestaña 0: Mi Perfil (Solo visible para Barbero) -->
+    <div id="panel-barber" style="display: none; margin-bottom: 20px;">
+      <div class="card-glass">
+        <h3 style="margin-bottom:12px;">Mi Perfil Público</h3>
+        <p class="service-meta" style="margin-bottom:16px;">Mantén actualizada tu información para los clientes.</p>
+        
+        <form id="form-barber-profile">
+          <div class="form-group">
+            <label class="form-label" for="edit-photo_file">Foto de Perfil</label>
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+              <div id="barber-preview-container" style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-surface-elevated); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <span class="text-muted" style="font-size: 0.7rem;" id="barber-preview-text">Sin Foto</span>
+                <img id="barber-preview-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <input class="form-control" type="file" id="edit-photo_file" accept="image/png, image/jpeg, image/webp" style="flex: 1;">
+            </div>
+            <p class="service-meta" style="margin-top: 4px; font-size: 0.8rem;">Sube una imagen cuadrada para mostrarla a los clientes.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-bio">Biografía / Presentación</label>
+            <textarea class="form-control" id="edit-bio" rows="3" placeholder="Escribe un poco sobre tu trayectoria y estilo..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-specialties">Especialidades (separadas por comas)</label>
+            <input class="form-control" type="text" id="edit-specialties" placeholder="Corte Clásico, Barba, Tintura, etc.">
+          </div>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+      </div>
     </div>
 
     <!-- Contenedor Sub-pestaña 1: Solicitudes por Confirmar -->
@@ -391,38 +423,7 @@ title: Portal Barbería
     </div>
   </div>
 
-  <!-- ==========================================
-       MODO BARBERO: EDICIÓN DE PERFIL (Solo Barbero)
-       ========================================== -->
-  <div id="panel-barber" style="display:none; margin-top:20px;">
-    <div class="card-glass">
-      <h3 style="margin-bottom:12px;">Mi Perfil Público</h3>
-      <p class="service-meta" style="margin-bottom:16px;">Mantén actualizada tu información para los clientes.</p>
-      
-      <form id="form-barber-profile">
-        <div class="form-group">
-          <label class="form-label" for="edit-photo_file">Foto de Perfil</label>
-          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
-            <div id="barber-preview-container" style="width: 60px; height: 60px; border-radius: 50%; background: var(--bg-surface-elevated); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-              <span class="text-muted" style="font-size: 0.7rem;" id="barber-preview-text">Sin Foto</span>
-              <img id="barber-preview-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <input class="form-control" type="file" id="edit-photo_file" accept="image/png, image/jpeg, image/webp" style="flex: 1;">
-          </div>
-          <p class="service-meta" style="margin-top: 4px; font-size: 0.8rem;">Sube una imagen cuadrada para mostrarla a los clientes.</p>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="edit-bio">Biografía / Presentación</label>
-          <textarea class="form-control" id="edit-bio" rows="3" placeholder="Escribe un poco sobre tu trayectoria y estilo..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="edit-specialties">Especialidades (separadas por comas)</label>
-          <input class="form-control" type="text" id="edit-specialties" placeholder="Corte Clásico, Barba, Tintura, etc.">
-        </div>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-      </form>
-    </div>
-  </div>
+
 
   <!-- Placeholder para indicar controles de administrador general adicionales si se requiere -->
   <div id="panel-superadmin" style="display:none;">
@@ -433,4 +434,4 @@ title: Portal Barbería
 
 <!-- Inyección de Lógica -->
 <script src="{{ '/assets/js/supabase-client.js' | relative_url }}"></script>
-<script src="{{ '/assets/js/admin.js' | relative_url }}?v=4"></script>
+<script src="{{ '/assets/js/admin.js' | relative_url }}?v=5"></script>
