@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="appointment-details">
             <p><strong>Cliente:</strong> ${app.client_name} (${app.client_phone})</p>
             ${app.client_email ? `<p><strong>Email:</strong> ${app.client_email}</p>` : ''}
-            <p><strong>Servicio:</strong> ${serviceName} ($${price.toFixed(2)})</p>
+            <p><strong>Servicio:</strong> ${serviceName} ($${Number(price).toLocaleString('es-CO')})</p>
             ${userProfile.is_admin ? `<p><strong>Barbero:</strong> ${barberName}</p>` : ''}
           </div>
           ${app.status === 'scheduled' ? `
@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
         listAppointments.appendChild(item);
       });
 
-      statEarnings.innerText = `$${totalGanancias.toFixed(2)}`;
+      statEarnings.innerText = `$${Number(totalGanancias).toLocaleString('es-CO')}`;
 
     } catch (err) {
       console.error("Error al cargar citas:", err.message);
