@@ -1,0 +1,29 @@
+---
+layout: default
+title: Página No Encontrada
+permalink: /404.html
+---
+
+<div class="app-view active" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; text-align: center; padding: 20px;">
+  
+  <!-- Icono de tijeras estilizado -->
+  <div style="width: 100px; height: 100px; border-radius: 50%; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);">
+    <i data-lucide="scissors" style="width: 44px; height: 44px; stroke: var(--primary); stroke-width: 1.5; transform: rotate(-45deg);"></i>
+  </div>
+
+  <!-- Título 404 con Gradiente -->
+  <h1 style="font-size: 5rem; line-height: 1; font-weight: 800; margin: 0; background: linear-gradient(135deg, #f3f4f6 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">404</h1>
+  
+  <h2 style="font-size: 1.35rem; font-weight: 600; color: var(--text-primary); margin-top: 12px; margin-bottom: 12px;">El corte que buscas no está en esta silla</h2>
+  
+  <p class="service-meta" style="max-width: 340px; font-size: 0.95rem; line-height: 1.6; margin-bottom: 32px; color: var(--text-secondary);">
+    La página que estás intentando buscar no existe o ha sido movida. Te sugerimos regresar al inicio para reservar tu turno.
+  </p>
+
+  <!-- Botón para volver -->
+  <a href="{{ '/' | relative_url }}" class="btn btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; padding: 12px 24px;">
+    <i data-lucide="home" style="width: 18px; height: 18px;"></i>
+    Volver al Inicio
+  </a>
+  
+</div>

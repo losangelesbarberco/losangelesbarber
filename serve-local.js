@@ -18,9 +18,15 @@ const server = http.createServer((req, res) => {
     }
 
     if (!fs.existsSync(filePath)) {
-        res.statusCode = 404;
-        res.end('Not found: ' + filePath);
-        return;
+        let custom404Path = path.join(__dirname, '404.html');
+        if (fs.existsSync(custom404Path)) {
+            filePath = custom404Path;
+            res.statusCode = 404;
+        } else {
+            res.statusCode = 404;
+            res.end('Not found: ' + filePath);
+            return;
+        }
     }
 
     let extname = path.extname(filePath);
