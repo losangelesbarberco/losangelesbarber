@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/styles.css' | relative_url }}?v=2">
   
   {% if site.primary_color %}
   <!-- Inyección de Color Dinámico desde _config.yml -->
@@ -210,6 +210,150 @@
     {% include bottom_nav.html %}
 
   </div>
+
+  <!-- Modal de Alerta / Confirmación Custom Premium -->
+  <div id="custom-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 11, 0.85); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 100000; opacity: 0; transition: opacity 0.3s ease;">
+    <div id="custom-modal-card" class="card-glass" style="width: 90%; max-width: 400px; padding: 24px; text-align: center; border-color: rgba(212, 175, 55, 0.25); transform: scale(0.9); transition: transform 0.3s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+      <div id="custom-modal-icon-container" style="width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; margin-left: auto; margin-right: auto; background: rgba(212, 175, 55, 0.1);">
+        <i id="custom-modal-icon" data-lucide="info" style="stroke: var(--primary); width: 28px; height: 28px;"></i>
+      </div>
+      <h3 id="custom-modal-title" style="margin-bottom: 12px; font-size: 1.25rem; color: #fff;">Mensaje</h3>
+      <p id="custom-modal-message" class="service-meta" style="margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5; color: var(--text-secondary);"></p>
+      
+      <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+        <button id="custom-modal-btn-cancel" class="btn btn-danger btn-small" style="display: none; padding: 10px 16px; margin: 0; flex: 1;">Cancelar</button>
+        <button id="custom-modal-btn-confirm" class="btn btn-primary btn-small" style="padding: 10px 16px; margin: 0; flex: 1;">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Implementación de Alertas y Confirmaciones en Modales Premium
+    window.showAlert = function(message, title = "Atención", iconName = "info") {
+      return new Promise((resolve) => {
+        const overlay = document.getElementById("custom-modal-overlay");
+        const card = document.getElementById("custom-modal-card");
+        const titleEl = document.getElementById("custom-modal-title");
+        const messageEl = document.getElementById("custom-modal-message");
+        const iconEl = document.getElementById("custom-modal-icon");
+        const btnCancel = document.getElementById("custom-modal-btn-cancel");
+        const btnConfirm = document.getElementById("custom-modal-btn-confirm");
+        const iconContainer = document.getElementById("custom-modal-icon-container");
+
+        if (!overlay || !card) {
+          alert(message);
+          resolve();
+          return;
+        }
+
+        titleEl.innerText = title;
+        messageEl.innerText = message;
+        btnCancel.style.display = "none";
+        btnConfirm.innerText = "Aceptar";
+        
+        iconEl.setAttribute("data-lucide", iconName);
+        if (iconName === "alert-triangle") {
+          iconContainer.style.background = "rgba(239, 68, 68, 0.1)";
+          iconEl.style.stroke = "var(--danger)";
+        } else {
+          iconContainer.style.background = "rgba(212, 175, 55, 0.1)";
+          iconEl.style.stroke = "var(--primary)";
+        }
+        
+        if (window.lucide) window.lucide.createIcons();
+
+        overlay.style.display = "flex";
+        setTimeout(() => {
+          overlay.style.opacity = "1";
+          card.style.transform = "scale(1)";
+        }, 10);
+
+        const handleConfirm = (e) => {
+          e.preventDefault();
+          btnConfirm.removeEventListener("click", handleConfirm);
+          card.style.transform = "scale(0.9)";
+          overlay.style.opacity = "0";
+          setTimeout(() => {
+            overlay.style.display = "none";
+            resolve();
+          }, 300);
+        };
+        btnConfirm.addEventListener("click", handleConfirm);
+      });
+    };
+
+    window.showConfirm = function(message, title = "Confirmar", iconName = "help-circle") {
+      return new Promise((resolve) => {
+        const overlay = document.getElementById("custom-modal-overlay");
+        const card = document.getElementById("custom-modal-card");
+        const titleEl = document.getElementById("custom-modal-title");
+        const messageEl = document.getElementById("custom-modal-message");
+        const iconEl = document.getElementById("custom-modal-icon");
+        const btnCancel = document.getElementById("custom-modal-btn-cancel");
+        const btnConfirm = document.getElementById("custom-modal-btn-confirm");
+        const iconContainer = document.getElementById("custom-modal-icon-container");
+
+        if (!overlay || !card) {
+          const result = confirm(message);
+          resolve(result);
+          return;
+        }
+
+        titleEl.innerText = title;
+        messageEl.innerText = message;
+        btnCancel.style.display = "block";
+        btnCancel.innerText = "Cancelar";
+        btnConfirm.innerText = "Confirmar";
+        
+        iconEl.setAttribute("data-lucide", iconName);
+        if (iconName === "trash-2" || iconName === "alert-triangle") {
+          iconContainer.style.background = "rgba(239, 68, 68, 0.1)";
+          iconEl.style.stroke = "var(--danger)";
+        } else {
+          iconContainer.style.background = "rgba(212, 175, 55, 0.1)";
+          iconEl.style.stroke = "var(--primary)";
+        }
+        
+        if (window.lucide) window.lucide.createIcons();
+
+        overlay.style.display = "flex";
+        setTimeout(() => {
+          overlay.style.opacity = "1";
+          card.style.transform = "scale(1)";
+        }, 10);
+
+        const cleanup = () => {
+          btnConfirm.removeEventListener("click", handleConfirm);
+          btnCancel.removeEventListener("click", handleCancel);
+        };
+
+        const handleConfirm = (e) => {
+          e.preventDefault();
+          cleanup();
+          card.style.transform = "scale(0.9)";
+          overlay.style.opacity = "0";
+          setTimeout(() => {
+            overlay.style.display = "none";
+            resolve(true);
+          }, 300);
+        };
+
+        const handleCancel = (e) => {
+          e.preventDefault();
+          cleanup();
+          card.style.transform = "scale(0.9)";
+          overlay.style.opacity = "0";
+          setTimeout(() => {
+            overlay.style.display = "none";
+            resolve(false);
+          }, 300);
+        };
+
+        btnConfirm.addEventListener("click", handleConfirm);
+        btnCancel.addEventListener("click", handleCancel);
+      });
+    };
+  </script>
 
   <!-- Inicialización de iconos de Lucide -->
   <script>

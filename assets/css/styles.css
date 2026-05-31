@@ -653,17 +653,27 @@ h1, h2, h3, h4 {
   border-radius: var(--border-radius-sm);
 }
 
-/* GestiÃ³n de Barberos / Servicios */
+/* Gestión de Barberos / Servicios */
 .admin-tab-bar {
   display: flex;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 16px;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Ocultar scrollbar Firefox */
+}
+
+.admin-tab-bar::-webkit-scrollbar {
+  display: none; /* Ocultar scrollbar Chrome/Safari */
 }
 
 .admin-tab-btn, .admin-subtab-btn {
-  flex: 1;
+  flex: 0 0 auto; /* Evita que los botones se encojan en móvil */
   text-align: center;
-  padding: 10px;
+  padding: 10px 16px;
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -797,6 +807,7 @@ h1, h2, h3, h4 {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  min-width: 500px;
 }
 
 .report-table th {
@@ -828,4 +839,69 @@ h1, h2, h3, h4 {
 .report-table tfoot td {
   color: var(--primary);
   padding: 14px 8px;
+}
+
+/* Tabla de Reportes Responsiva en Móviles (Colapso en Tarjetas) */
+@media (max-width: 600px) {
+  .report-table, 
+  .report-table thead, 
+  .report-table tbody, 
+  .report-table tr, 
+  .report-table th, 
+  .report-table td {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  
+  .report-table thead {
+    display: none; /* Ocultar cabeceras tabulares */
+  }
+  
+  .report-table tr {
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: var(--border-radius-md);
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  
+  .report-table tr:last-child {
+    margin-bottom: 0;
+  }
+  
+  .report-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: left !important;
+  }
+  
+  .report-table td:last-child {
+    border-bottom: none;
+  }
+  
+  /* Mostrar etiquetas usando el atributo data-label */
+  .report-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-right: 12px;
+  }
+
+  /* Caso especial para cuando no hay datos */
+  .report-table td[colspan] {
+    display: block;
+    text-align: center !important;
+    justify-content: center;
+    border-bottom: none;
+  }
+  
+  .report-table td[colspan]::before {
+    display: none !important;
+  }
 }

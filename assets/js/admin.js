@@ -123,10 +123,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) throw error;
 
+      const navAdmin = document.getElementById("nav-admin");
       if (session) {
         currentUserSession = session;
+        if (navAdmin) navAdmin.style.display = "flex";
         await loadUserDataAndRedirect();
       } else {
+        if (navAdmin) navAdmin.style.display = "none";
         showLoginView();
         if (typeof window.hidePageLoader === 'function') {
           window.hidePageLoader();
@@ -134,6 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (err) {
       console.error("Error comprobando sesión:", err.message);
+      const navAdmin = document.getElementById("nav-admin");
+      if (navAdmin) navAdmin.style.display = "none";
       showLoginView();
       if (typeof window.hidePageLoader === 'function') {
         window.hidePageLoader();
@@ -251,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       console.error("Error cargando perfil del usuario:", err.message);
-      alert("Error al cargar perfil de usuario: " + err.message);
+      await showAlert("Error al cargar perfil de usuario: " + err.message, "Error de Perfil", "alert-triangle");
       handleLogout();
     } finally {
       if (typeof window.hidePageLoader === 'function') {
@@ -281,10 +286,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (error) throw error;
 
         currentUserSession = data.session;
+        const navAdmin = document.getElementById("nav-admin");
+        if (navAdmin) navAdmin.style.display = "flex";
         await loadUserDataAndRedirect();
       } catch (err) {
         console.error("Error Login:", err.message);
-        alert("Credenciales inválidas o error de red: " + err.message);
+        await showAlert("Credenciales inválidas o error de red: " + err.message, "Error de Autenticación", "alert-triangle");
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = "Ingresar";
@@ -535,7 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
       confirmMsg = `¿Estás seguro de cancelar esta cita?`;
     }
 
-    if (!confirm(confirmMsg)) return;
+    if (!await showConfirm(confirmMsg, "Actualizar Estado", newStatus === 'cancelled' ? 'alert-triangle' : 'help-circle')) return;
 
     try {
       const { error } = await supabase
@@ -549,7 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
       loadAppointments();
     } catch (err) {
       console.error("Error actualizando cita:", err.message);
-      alert("No se pudo actualizar el estado de la cita: " + err.message);
+      await showAlert("No se pudo actualizar el estado de la cita: " + err.message, "Error", "alert-triangle");
     }
   }
 
@@ -606,7 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .eq("user_id", currentUserSession.user.id);
 
         if (error) throw error;
-        alert("¡Perfil actualizado con éxito!");
+        await showAlert("¡Perfil actualizado con éxito!", "Perfil Actualizado", "check-circle");
 
         // Limpiar input file
         if (editPhotoFile) editPhotoFile.value = "";
@@ -615,7 +622,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadUserDataAndRedirect();
       } catch (err) {
         console.error("Error actualizando perfil barbero:", err.message);
-        alert("Ocurrió un error al guardar: " + err.message);
+        await showAlert("Ocurrió un error al guardar: " + err.message, "Error al Guardar", "alert-triangle");
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = "Guardar Cambios";
@@ -694,7 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
       loadAdminServices();
     } catch (err) {
       console.error("Error cambiando estado de servicio:", err.message);
-      alert("Error al modificar servicio: " + err.message);
+      await showAlert("Error al modificar servicio: " + err.message, "Error de Servicio", "alert-triangle");
     }
   }
 
@@ -711,13 +718,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function deleteService(serviceId) {
-    if (!confirm("¿Estás seguro de eliminar permanentemente este servicio? (Las citas existentes mantendrán el registro, pero el servicio no volverá a aparecer)")) return;
+    if (!await showConfirm("¿Estás seguro de eliminar permanentemente este servicio? (Las citas existentes mantendrán el registro, pero el servicio no volverá a aparecer)", "Eliminar Servicio", "trash-2")) return;
     try {
       const { error } = await supabase.from("services").delete().eq("id", serviceId);
       if (error) throw error;
       loadAdminServices();
     } catch (err) {
-      alert("Error al eliminar servicio: " + err.message);
+      await showAlert("Error al eliminar servicio: " + err.message, "Error de Servicio", "alert-triangle");
     }
   }
 
@@ -752,13 +759,13 @@ document.addEventListener("DOMContentLoaded", () => {
             .update({ name, price, duration_minutes, description })
             .eq("id", serviceId);
           if (error) throw error;
-          alert("Servicio actualizado exitosamente.");
+          await showAlert("Servicio actualizado exitosamente.", "Servicio Actualizado", "check-circle");
         } else {
           const { error } = await supabase
             .from("services")
             .insert([{ name, price, duration_minutes, description, active: true }]);
           if (error) throw error;
-          alert("Servicio creado exitosamente.");
+          await showAlert("Servicio creado exitosamente.", "Servicio Creado", "check-circle");
         }
 
         formManageService.reset();
@@ -768,7 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadAdminServices();
       } catch (err) {
         console.error("Error creando/actualizando servicio:", err.message);
-        alert("Error al guardar el servicio: " + err.message);
+        await showAlert("Error al guardar el servicio: " + err.message, "Error al Guardar", "alert-triangle");
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = serviceId ? "Actualizar Servicio" : "Crear Servicio";
@@ -835,18 +842,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) throw error;
       loadAdminBarbers();
     } catch (err) {
-      alert("Error al modificar barbero: " + err.message);
+      await showAlert("Error al modificar barbero: " + err.message, "Error de Barbero", "alert-triangle");
     }
   }
 
   async function deleteBarber(barberId) {
-    if (!confirm("¿Estás seguro de que deseas eliminar permanentemente a este barbero? (Sus citas pasadas quedarán en el historial como 'Sin Asignar').")) return;
+    if (!await showConfirm("¿Estás seguro de que deseas eliminar permanentemente a este barbero? (Sus citas pasadas quedarán en el historial como 'Sin Asignar').", "Eliminar Barbero", "trash-2")) return;
     try {
       const { error } = await supabase.from("barbers").delete().eq("id", barberId);
       if (error) throw error;
       loadAdminBarbers();
     } catch (err) {
-      alert("Error al eliminar barbero: " + err.message);
+      await showAlert("Error al eliminar barbero: " + err.message, "Error de Barbero", "alert-triangle");
     }
   }
 
@@ -902,7 +909,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Modo Edición
           const { error } = await supabase.from("barbers").update({ name, specialties, bio }).eq("id", barberId);
           if (error) throw new Error("Error al actualizar: " + error.message);
-          alert("Barbero actualizado exitosamente.");
+          await showAlert("Barbero actualizado exitosamente.", "Barbero Actualizado", "check-circle");
         } else {
           // Modo Creación
           const tempClient = window.SupabaseLib.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
@@ -924,7 +931,7 @@ document.addEventListener("DOMContentLoaded", () => {
             active: true
           }]);
           if (error) throw new Error("Error al enlazar barbero: " + error.message);
-          alert("Barbero creado exitosamente con sus credenciales de acceso.");
+          await showAlert("Barbero creado exitosamente con sus credenciales de acceso.", "Barbero Creado", "check-circle");
         }
 
         formManageBarber.reset();
@@ -939,7 +946,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         loadAdminBarbers();
       } catch (err) {
-        alert("Atención: " + err.message);
+        await showAlert("Atención: " + err.message, "Atención", "alert-triangle");
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = barberId ? "Actualizar Barbero" : "Crear Barbero";
@@ -983,7 +990,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.querySelectorAll(".btn-delete-gallery").forEach(btn => {
         btn.addEventListener("click", async (e) => {
-          if (!confirm("¿Eliminar esta foto de la galería pública?")) return;
+          if (!await showConfirm("¿Eliminar esta foto de la galería pública?", "Eliminar Foto", "trash-2")) return;
           const idx = e.currentTarget.dataset.index;
           galleryArray.splice(idx, 1);
           await saveGallerySettings();
@@ -1005,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) throw error;
       loadAdminGallery();
     } catch (err) {
-      alert("Error actualizando galería: " + err.message);
+      await showAlert("Error actualizando galería: " + err.message, "Error de Galería", "alert-triangle");
     }
   }
 
@@ -1038,7 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await saveGallerySettings();
         formManageGallery.reset();
       } catch (err) {
-        alert("Error al subir foto: " + err.message);
+        await showAlert("Error al subir foto: " + err.message, "Error de Subida", "alert-triangle");
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerHTML = originalText;
@@ -1079,19 +1086,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnGetGps = document.getElementById("btn-get-gps");
     console.log("GPS Button found:", btnGetGps);
     if (btnGetGps) {
-      btnGetGps.addEventListener("click", (e) => {
+      btnGetGps.addEventListener("click", async (e) => {
         e.preventDefault();
-        alert("Botón GPS clickeado");
+        await showAlert("Obteniendo ubicación del dispositivo...", "Geolocalización", "map-pin");
 
         if (!navigator.geolocation) {
-          alert("Tu navegador no soporta geolocalización o necesitas usar HTTPS.");
+          await showAlert("Tu navegador no soporta geolocalización o necesitas usar HTTPS.", "Geolocalización", "alert-triangle");
           return;
         }
 
         btnGetGps.innerHTML = `<i data-lucide="loader" class="spin" style="width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> ...`;
         if (window.lucide) window.lucide.createIcons();
 
-        navigator.geolocation.getCurrentPosition((pos) => {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const mapInput = document.getElementById("set-map_url");
@@ -1104,8 +1111,8 @@ document.addEventListener("DOMContentLoaded", () => {
           btnGetGps.innerHTML = `<i data-lucide="check" style="stroke:#10B981; width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> OK`;
           if (window.lucide) window.lucide.createIcons();
 
-        }, (err) => {
-          alert("No se pudo obtener la ubicación: Permiso denegado o error (" + err.message + ")");
+        }, async (err) => {
+          await showAlert("No se pudo obtener la ubicación: Permiso denegado o error (" + err.message + ")", "Error de GPS", "alert-triangle");
           btnGetGps.innerHTML = `<i data-lucide="map-pin" style="width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> Mi GPS`;
           if (window.lucide) window.lucide.createIcons();
         }, { enableHighAccuracy: true });
@@ -1154,7 +1161,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const { error } = await supabase.from("settings").upsert(updates);
         if (error) throw error;
 
-        alert("Textos e imagen guardados correctamente.");
+        await showAlert("Textos e imagen guardados correctamente.", "Configuración Guardada", "check-circle");
 
         // Actualizar la previsualización
         if (logoUrl) {
@@ -1168,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", () => {
           fileInput.value = ""; // limpiar input
         }
       } catch (err) {
-        alert("Error guardando configuración: " + err.message);
+        await showAlert("Error guardando configuración: " + err.message, "Error al Guardar", "alert-triangle");
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = "Guardar Textos";
@@ -1300,7 +1307,7 @@ document.addEventListener("DOMContentLoaded", () => {
       startDate = document.getElementById("report-start-date").value;
       endDate = document.getElementById("report-end-date").value;
       if (!startDate || !endDate) {
-        alert("Por favor ingresa ambas fechas para el rango personalizado.");
+        await showAlert("Por favor ingresa ambas fechas para el rango personalizado.", "Rango de Fechas Requerido", "info");
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerHTML = originalText;
         return;
@@ -1418,11 +1425,11 @@ document.addEventListener("DOMContentLoaded", () => {
         grandTotalEarnings += stats.totalEarnings;
 
         row.innerHTML = `
-          <td style="padding: 12px 8px; font-weight: 500;">${stats.name}</td>
-          <td style="padding: 12px 8px; text-align: center;">${stats.completed}</td>
-          <td style="padding: 12px 8px; text-align: center; color: ${stats.cancelled > 0 ? 'var(--danger)' : 'var(--text-secondary)'};">${stats.cancelled}</td>
-          <td style="padding: 12px 8px; text-align: center; color: ${stats.scheduled > 0 ? 'var(--primary)' : 'var(--text-secondary)'};">${stats.scheduled}</td>
-          <td style="padding: 12px 8px; text-align: right; font-weight: 600; color: var(--primary);">$${Number(stats.totalEarnings).toLocaleString('es-CO')}</td>
+          <td data-label="Barbero" style="padding: 12px 8px; font-weight: 500;">${stats.name}</td>
+          <td data-label="Completadas" style="padding: 12px 8px; text-align: center;">${stats.completed}</td>
+          <td data-label="Canceladas" style="padding: 12px 8px; text-align: center; color: ${stats.cancelled > 0 ? 'var(--danger)' : 'var(--text-secondary)'};">${stats.cancelled}</td>
+          <td data-label="Agendadas" style="padding: 12px 8px; text-align: center; color: ${stats.scheduled > 0 ? 'var(--primary)' : 'var(--text-secondary)'};">${stats.scheduled}</td>
+          <td data-label="Total Producido" style="padding: 12px 8px; text-align: right; font-weight: 600; color: var(--primary);">$${Number(stats.totalEarnings).toLocaleString('es-CO')}</td>
         `;
         tableBody.appendChild(row);
       });
@@ -1431,11 +1438,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const tfoot = document.createElement("tr");
         tfoot.style.cssText = "border-top: 2px solid rgba(255,255,255,0.1); font-weight: 700; background-color: rgba(255, 255, 255, 0.01);";
         tfoot.innerHTML = `
-          <td style="padding: 14px 8px; color: var(--text-primary);">TOTAL GENERAL</td>
-          <td style="padding: 14px 8px; text-align: center; color: var(--success);">${grandTotalCompleted}</td>
-          <td style="padding: 14px 8px; text-align: center; color: var(--danger);">${grandTotalCancelled}</td>
-          <td style="padding: 14px 8px; text-align: center; color: var(--primary);">${grandTotalScheduled}</td>
-          <td style="padding: 14px 8px; text-align: right; color: var(--primary);">$${Number(grandTotalEarnings).toLocaleString('es-CO')}</td>
+          <td data-label="Resumen" style="padding: 14px 8px; color: var(--text-primary);">TOTAL GENERAL</td>
+          <td data-label="Completadas" style="padding: 14px 8px; text-align: center; color: var(--success);">${grandTotalCompleted}</td>
+          <td data-label="Canceladas" style="padding: 14px 8px; text-align: center; color: var(--danger);">${grandTotalCancelled}</td>
+          <td data-label="Agendadas" style="padding: 14px 8px; text-align: center; color: var(--primary);">${grandTotalScheduled}</td>
+          <td data-label="Total Producido" style="padding: 14px 8px; text-align: right; color: var(--primary);">$${Number(grandTotalEarnings).toLocaleString('es-CO')}</td>
         `;
         tableBody.appendChild(tfoot);
       }
@@ -1506,7 +1513,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       console.error("Error al generar reporte:", err.message);
-      alert("Error al cargar datos del reporte: " + err.message);
+      await showAlert("Error al cargar datos del reporte: " + err.message, "Error de Reporte", "alert-triangle");
     } finally {
       btnSubmit.removeAttribute("disabled");
       btnSubmit.innerHTML = originalText;

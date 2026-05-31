@@ -65,10 +65,10 @@ title: Portal Barbería
   <div class="admin-subpane active" id="tab-appointments">
     
     <!-- Selector de Sub-pestañas para Citas -->
-    <div class="admin-tab-bar" style="margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; gap: 8px;">
-      <button class="admin-subtab-btn" id="btn-subtab-profile" style="font-size: 0.9rem; padding: 10px; flex: 1; display: none;">Mi Perfil</button>
-      <button class="admin-subtab-btn active" id="btn-subtab-pending" style="font-size: 0.9rem; padding: 10px; flex: 1;">Solicitudes por Confirmar</button>
-      <button class="admin-subtab-btn" id="btn-subtab-agenda" style="font-size: 0.9rem; padding: 10px; flex: 1;">Agenda / Citas Agendadas</button>
+    <div class="admin-tab-bar" style="margin-bottom: 20px;">
+      <button class="admin-subtab-btn" id="btn-subtab-profile" style="display: none;">Mi Perfil</button>
+      <button class="admin-subtab-btn active" id="btn-subtab-pending">Solicitudes por Confirmar</button>
+      <button class="admin-subtab-btn" id="btn-subtab-agenda">Agenda / Citas Agendadas</button>
     </div>
 
     <!-- Contenedor Sub-pestaña 0: Mi Perfil (Solo visible para Barbero) -->
@@ -398,7 +398,7 @@ title: Portal Barbería
     <!-- Tabla de Desglose por Barbero -->
     <h3 style="margin-bottom: 12px;" id="report-table-title">Desglose de Producción</h3>
     <div class="card" style="padding: 16px; overflow-x: auto; margin-bottom: 24px;">
-      <table class="report-table" style="width: 100%; border-collapse: collapse; min-width: 500px;">
+      <table class="report-table">
         <thead>
           <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); text-align: left; color:var(--text-secondary); font-size: 0.9rem;">
             <th style="padding: 12px 8px;">Barbero</th>
@@ -434,4 +434,4 @@ title: Portal Barbería
 
 <!-- Inyección de Lógica -->
 <script src="{{ '/assets/js/supabase-client.js' | relative_url }}"></script>
-<script src="{{ '/assets/js/admin.js' | relative_url }}?v=5"></script>
+<script src="{{ '/assets/js/admin.js' | relative_url }}?v=8"></script>

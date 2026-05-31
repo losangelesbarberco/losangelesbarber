@@ -96,9 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
   async function checkAdminMenu() {
     try {
       const { data } = await supabase.auth.getSession();
-      if (data && data.session) {
-        const navAdmin = document.getElementById("nav-admin");
-        if (navAdmin) navAdmin.style.display = "flex";
+      const navAdmin = document.getElementById("nav-admin");
+      if (navAdmin) {
+        navAdmin.style.display = (data && data.session) ? "flex" : "none";
       }
     } catch (e) {}
   }
@@ -686,7 +686,7 @@ Por favor confirmen mi turno. ¡Muchas gracias!`;
         goToStep(4); // Ir al paso 5 (índice 4)
       } catch (err) {
         console.error("Error insertando reserva:", err.message);
-        alert("Ocurrió un error al agendar tu cita: " + err.message);
+        await showAlert("Ocurrió un error al agendar tu cita: " + err.message, "Error al Agendar", "alert-triangle");
       } finally {
         btnSubmit.removeAttribute("disabled");
         btnSubmit.innerText = originalText;
