@@ -112,6 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (settings && settings.length > 0) {
         let hasSocialLinks = false;
         settings.forEach(setting => {
+          if (setting.id === 'social_whatsapp') {
+            window.shopWhatsappNumber = setting.value.trim();
+          }
           if (setting.id.startsWith("social_")) {
             const network = setting.id.replace("social_", "");
             const linkEl = document.getElementById(`link-${network}`);
@@ -653,6 +656,28 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `;
         
+        // Configurar botón de confirmación de WhatsApp
+        const btnWa = document.getElementById("btn-whatsapp-confirm");
+        if (btnWa && window.shopWhatsappNumber && window.shopWhatsappNumber.trim() !== "") {
+          const cleanPhone = window.shopWhatsappNumber.replace(/\D/g, "");
+          const appointmentId = data && data[0] ? data[0].id.substring(0, 8).toUpperCase() : "";
+          const msg = `¡Hola! Acabo de agendar una cita en Los Ángeles Barber.
+
+Detalles de la cita:
+• Referencia: #${appointmentId}
+• Cliente: ${name}
+• Servicio: ${bookingState.serviceName}
+• Barbero: ${bookingState.barberName}
+• Fecha: ${formattedDate}
+• Hora: ${bookingState.selectedTime} hs
+
+Por favor confirmen mi turno. ¡Muchas gracias!`;
+          btnWa.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+          btnWa.style.display = "flex";
+        } else if (btnWa) {
+          btnWa.style.display = "none";
+        }
+
         // Re-iniciar iconos en el contenido inyectado
         lucide.createIcons();
         
