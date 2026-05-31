@@ -74,6 +74,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // --- Sub-pestañas Internas de Citas (Por Confirmar vs Agenda) ---
+  const btnSubtabPending = document.getElementById("btn-subtab-pending");
+  const btnSubtabAgenda = document.getElementById("btn-subtab-agenda");
+  const panePending = document.getElementById("subtab-pane-pending");
+  const paneAgenda = document.getElementById("subtab-pane-agenda");
+
+  if (btnSubtabPending && btnSubtabAgenda && panePending && paneAgenda) {
+    btnSubtabPending.addEventListener("click", (e) => {
+      e.preventDefault();
+      btnSubtabPending.classList.add("active");
+      btnSubtabAgenda.classList.remove("active");
+      panePending.style.display = "block";
+      paneAgenda.style.display = "none";
+    });
+
+    btnSubtabAgenda.addEventListener("click", (e) => {
+      e.preventDefault();
+      btnSubtabAgenda.classList.add("active");
+      btnSubtabPending.classList.remove("active");
+      paneAgenda.style.display = "block";
+      panePending.style.display = "none";
+    });
+  }
+
   // --- 1. Verificación Inicial de Autenticación ---
   checkAuth();
 
@@ -238,6 +262,11 @@ document.addEventListener("DOMContentLoaded", () => {
     listAppointments.innerHTML = "<p class='text-muted'>Cargando citas...</p>";
     const selectedDate = dateFilterInput.value;
 
+    const agendaTitle = document.getElementById("agenda-section-title");
+    if (agendaTitle) {
+      agendaTitle.innerText = selectedDate ? "Agenda del Día" : "Todas las Citas Agendadas";
+    }
+
     try {
       let query = supabase
         .from("appointments")
@@ -246,8 +275,14 @@ document.addEventListener("DOMContentLoaded", () => {
           barbers ( name ),
           services ( name, price )
         `)
-        .eq("appointment_date", selectedDate)
+        .order("appointment_date", { ascending: true })
         .order("appointment_time", { ascending: true });
+
+      if (selectedDate) {
+        query = query.eq("appointment_date", selectedDate);
+      } else {
+        query = query.eq("status", "scheduled");
+      }
 
       // Si es barbero, filtrar únicamente sus citas
       if (!userProfile.is_admin && barberProfile) {
@@ -284,6 +319,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const serviceName = app.services ? app.services.name : "Servicio Desconocido";
         const barberName = app.barbers ? app.barbers.name : "Sin Asignar";
 
+        // Formatear la fecha para cuando mostramos todas las citas agendadas
+        const rawDate = new Date(app.appointment_date + "T00:00:00");
+        const formattedDate = rawDate.toLocaleDateString("es-ES", { weekday: 'short', day: 'numeric', month: 'short' });
+        const timeText = selectedDate ? `${formattedTime} hs` : `${formattedDate} - ${formattedTime} hs`;
+
         // Traducir etiquetas de estado
         let statusText = "Confirmado";
         let statusClass = "status-scheduled";
@@ -300,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         item.innerHTML = `
           <div class="appointment-header">
-            <span class="appointment-time-tag">${formattedTime} hs</span>
+            <span class="appointment-time-tag">${timeText}</span>
             <span class="appointment-status-tag ${statusClass}">${statusText}</span>
           </div>
           <div class="appointment-details">
@@ -350,9 +390,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadPendingAppointments() {
-    const pendingSection = document.getElementById("pending-appointments-section");
     const listPending = document.getElementById("list-pending-appointments");
-    if (!pendingSection || !listPending) return;
+    if (!listPending) return;
 
     try {
       let query = supabase
@@ -375,11 +414,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) throw error;
 
       if (!pendingApps || pendingApps.length === 0) {
-        pendingSection.style.display = "none";
+        listPending.innerHTML = `<p class="text-muted" style="text-align: center; padding: 40px 0;">No tienes solicitudes de citas pendientes por confirmar.</p>`;
         return;
       }
 
-      pendingSection.style.display = "block";
       listPending.innerHTML = "";
 
       pendingApps.forEach(app => {
@@ -437,6 +475,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Escuchar cambios en la fecha del filtro
   if (dateFilterInput) {
     dateFilterInput.addEventListener("change", loadAppointments);
+  }
+
+  const btnClearDateFilter = document.getElementById("btn-clear-date-filter");
+  if (btnClearDateFilter) {
+    btnClearDateFilter.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (dateFilterInput) {
+        dateFilterInput.value = "";
+        loadAppointments();
+      }
+    });
   }
 
   async function updateAppointmentStatus(appointmentId, newStatus) {

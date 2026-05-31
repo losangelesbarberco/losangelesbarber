@@ -64,41 +64,49 @@ title: Portal Barbería
        ========================================== -->
   <div class="admin-subpane active" id="tab-appointments">
     
-    <!-- Filtro de Fecha para las citas -->
-    <div class="card" style="padding:15px; margin-bottom:16px;">
-      <div class="form-group" style="margin-bottom:0px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-        <label class="form-label" for="date-filter" style="margin-bottom:0; font-weight:600;">Ver turnos del día:</label>
-        <input class="form-control" type="date" id="date-filter" style="max-width:180px; padding:8px 12px; font-size:0.9rem;">
-      </div>
+    <!-- Selector de Sub-pestañas para Citas -->
+    <div class="admin-tab-bar" style="margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; gap: 8px;">
+      <button class="admin-tab-btn active" id="btn-subtab-pending" style="font-size: 0.9rem; padding: 10px; flex: 1;">Solicitudes por Confirmar</button>
+      <button class="admin-tab-btn" id="btn-subtab-agenda" style="font-size: 0.9rem; padding: 10px; flex: 1;">Agenda / Citas Agendadas</button>
     </div>
 
-    <!-- Indicadores / Stats del Día -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-label">Total Citas</span>
-        <div class="stat-val" id="stat-appointments-count">0</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Ganado (Cobrado)</span>
-        <div class="stat-val" id="stat-earnings">$0</div>
-      </div>
-    </div>
-
-    <!-- Solicitudes Pendientes (Citas por Confirmar) -->
-    <div id="pending-appointments-section" style="margin-bottom: 24px; display: none;">
-      <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--warning);">
-        <i data-lucide="clock" style="stroke: var(--warning); width: 20px; height: 20px;"></i>
-        Solicitudes por Confirmar
-      </h3>
+    <!-- Contenedor Sub-pestaña 1: Solicitudes por Confirmar -->
+    <div id="subtab-pane-pending">
       <div id="list-pending-appointments">
         <!-- Inyectado dinámicamente -->
       </div>
     </div>
 
-    <!-- Listado Dinámico de Citas -->
-    <h3 style="margin-bottom: 12px;">Agenda</h3>
-    <div id="list-appointments">
-      <!-- Inyectado dinámicamente -->
+    <!-- Contenedor Sub-pestaña 2: Agenda del Día -->
+    <div id="subtab-pane-agenda" style="display: none;">
+      <!-- Filtro de Fecha para las citas -->
+      <div class="card" style="padding:15px; margin-bottom:16px;">
+        <div class="form-group" style="margin-bottom:0px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap: wrap;">
+          <label class="form-label" for="date-filter" style="margin-bottom:0; font-weight:600;">Filtrar por fecha:</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input class="form-control" type="date" id="date-filter" style="max-width:180px; padding:8px 12px; font-size:0.9rem;">
+            <button class="btn btn-small" id="btn-clear-date-filter" style="width:auto; padding:8px 12px; font-size:0.85rem; white-space:nowrap; background:var(--bg-surface-elevated); border:1px solid rgba(255,255,255,0.1);">Ver Todas</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicadores / Stats del Día -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Total Citas</span>
+          <div class="stat-val" id="stat-appointments-count">0</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Ganado (Cobrado)</span>
+          <div class="stat-val" id="stat-earnings">$0</div>
+        </div>
+      </div>
+
+      <!-- Listado Dinámico de Citas -->
+      <h3 style="margin-bottom: 12px;" id="agenda-section-title">Agenda</h3>
+      <div id="list-appointments">
+        <!-- Inyectado dinámicamente -->
+      </div>
     </div>
   </div>
 
