@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => {
       tabBtns.forEach(b => b.classList.remove("active"));
       subPanes.forEach(p => p.classList.remove("active"));
-      
+
       btn.classList.add("active");
       const targetId = btn.dataset.tab;
       document.getElementById(targetId).classList.add("active");
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userGreeting.innerText = `Hola, ${currentUserSession.user.email.split("@")[0]}`;
         userRoleTag.innerText = "Super Administrador";
         userRoleTag.className = "appointment-status-tag status-scheduled";
-        
+
         panelSuperAdmin.style.display = "block";
         panelBarber.style.display = "none";
         adminTabContainer.style.display = "flex";
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
         panelSuperAdmin.style.display = "none";
         panelBarber.style.display = "block";
         adminTabContainer.style.display = "none"; // Ocultar pestañas de admin global
-        
+
         // Bloqueo estricto de subpaneles de Super Admin
         document.getElementById("tab-services").style.display = "none";
         document.getElementById("tab-barbers").style.display = "none";
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
           barberPreviewImg.style.display = "block";
           barberPreviewText.style.display = "none";
         }
-        
+
         await loadAppointments();
       } else {
         // Usuario autenticado pero sin rol de admin ni barbero
@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (formLogin) {
     formLogin.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
+
       const email = document.getElementById("admin-email").value.trim();
       const password = document.getElementById("admin-password").value.trim();
       const btnSubmit = formLogin.querySelector("button[type='submit']");
@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) throw error;
 
       listAppointments.innerHTML = "";
-      
+
       // Calcular Estadísticas
       let totalCitas = appointments.length;
       let totalGanancias = 0;
@@ -272,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
       appointments.forEach(app => {
         const item = document.createElement("div");
         item.className = `appointment-list-item ${app.status}`;
-        
+
         const price = app.services ? parseFloat(app.services.price) : 0;
         if (app.status === "completed") {
           totalGanancias += price;
@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (formBarberProfile) {
     formBarberProfile.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
+
       const btnSubmit = formBarberProfile.querySelector("button[type='submit']");
       btnSubmit.setAttribute("disabled", "true");
       btnSubmit.innerText = "Guardando...";
@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const file = editPhotoFile.files[0];
           const fileExt = file.name.split('.').pop();
           const fileName = `barber_${currentUserSession.user.id}_${Date.now()}.${fileExt}`;
-          
+
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('logos')
             .upload(fileName, file, { cacheControl: '3600', upsert: true });
@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .getPublicUrl(fileName);
 
           finalPhotoUrl = publicUrl;
-          
+
           barberPreviewImg.src = finalPhotoUrl;
           barberPreviewImg.style.display = "block";
           barberPreviewText.style.display = "none";
@@ -434,10 +434,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (error) throw error;
         alert("¡Perfil actualizado con éxito!");
-        
+
         // Limpiar input file
-        if(editPhotoFile) editPhotoFile.value = "";
-        
+        if (editPhotoFile) editPhotoFile.value = "";
+
         // Recargar datos locales
         await loadUserDataAndRedirect();
       } catch (err) {
@@ -472,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = document.createElement("div");
         item.className = "service-item";
         item.style.cursor = "default";
-        
+
         item.innerHTML = `
           <div class="service-info">
             <span class="service-name">${service.name} ${!service.active ? '<span class="text-danger">(Inactivo)</span>' : ''}</span>
@@ -531,7 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("service-price").value = service.price;
     document.getElementById("service-duration").value = service.duration_minutes;
     document.getElementById("service-desc").value = service.description || '';
-    
+
     document.getElementById("btn-submit-service").innerText = "Actualizar Servicio";
     document.getElementById("btn-cancel-service").style.display = "block";
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -620,7 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
         item.style.cursor = "default";
         const specText = barber.specialties ? barber.specialties.join(", ") : "Sin especialidades";
         const emailText = barber.login_email ? barber.login_email : "Sin correo vinculado";
-        
+
         item.innerHTML = `
           <div class="service-info">
             <span class="service-name">${barber.name} ${!barber.active ? '<span class="text-danger">(Inactivo)</span>' : ''}</span>
@@ -641,7 +641,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         const btnToggle = item.querySelector(".toggle-barber-btn");
         btnToggle.addEventListener("click", () => toggleBarberActive(barber.id, barber.active));
-        
+
         const btnEdit = item.querySelector(".edit-barber-btn");
         btnEdit.addEventListener("click", () => editBarber(barber));
 
@@ -683,7 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("barber-email").value = barber.login_email || '';
     document.getElementById("barber-specialties").value = barber.specialties ? barber.specialties.join(", ") : "";
     document.getElementById("barber-bio").value = barber.bio || '';
-    
+
     // Deshabilitar credenciales para edición
     document.getElementById("barber-email").setAttribute("disabled", "true");
     document.getElementById("barber-password").setAttribute("disabled", "true");
@@ -699,11 +699,11 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCancelBarber.addEventListener("click", () => {
       document.getElementById("barber-id").value = "";
       formManageBarber.reset();
-      
+
       document.getElementById("barber-email").removeAttribute("disabled");
       document.getElementById("barber-password").removeAttribute("disabled");
       document.getElementById("barber-password").setAttribute("required", "true");
-      
+
       document.getElementById("btn-submit-barber").innerText = "Crear Barbero";
       btnCancelBarber.style.display = "none";
     });
@@ -740,15 +740,15 @@ document.addEventListener("DOMContentLoaded", () => {
             password
           });
           if (authError) throw new Error("Error al crear cuenta: " + authError.message);
-          
+
           const newUserId = authData.user ? authData.user.id : null;
-          const { error } = await supabase.from("barbers").insert([{ 
+          const { error } = await supabase.from("barbers").insert([{
             user_id: newUserId,
             login_email: email,
-            name, 
-            specialties, 
+            name,
+            specialties,
             bio,
-            active: true 
+            active: true
           }]);
           if (error) throw new Error("Error al enlazar barbero: " + error.message);
           alert("Barbero creado exitosamente con sus credenciales de acceso.");
@@ -756,14 +756,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         formManageBarber.reset();
         document.getElementById("barber-id").value = "";
-        
+
         // Restaurar estado de inputs
         document.getElementById("barber-email").removeAttribute("disabled");
         document.getElementById("barber-password").removeAttribute("disabled");
         document.getElementById("barber-password").setAttribute("required", "true");
-        
+
         if (btnCancelBarber) btnCancelBarber.style.display = "none";
-        
+
         loadAdminBarbers();
       } catch (err) {
         alert("Atención: " + err.message);
@@ -784,15 +784,15 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const { data, error } = await supabase.from("settings").select("value").eq("id", "gallery_images").maybeSingle();
       if (error) throw error;
-      
+
       galleryArray = data && data.value ? JSON.parse(data.value) : [];
-      
+
       listAdminGallery.innerHTML = "";
       if (galleryArray.length === 0) {
         listAdminGallery.innerHTML = "<p class='text-muted' style='grid-column:1/-1;'>No hay fotos en la galería.</p>";
         return;
       }
-      
+
       galleryArray.forEach((url, index) => {
         const item = document.createElement("div");
         item.style.position = "relative";
@@ -807,7 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         listAdminGallery.appendChild(item);
       });
-      
+
       document.querySelectorAll(".btn-delete-gallery").forEach(btn => {
         btn.addEventListener("click", async (e) => {
           if (!confirm("¿Eliminar esta foto de la galería pública?")) return;
@@ -816,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
           await saveGallerySettings();
         });
       });
-      
+
       if (window.lucide) window.lucide.createIcons();
     } catch (err) {
       console.error("Error cargando galería:", err.message);
@@ -841,27 +841,27 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const fileInput = document.getElementById("gallery-photo-file");
       if (!fileInput.files || fileInput.files.length === 0) return;
-      
+
       const btnSubmit = formManageGallery.querySelector("button[type='submit']");
       const originalText = btnSubmit.innerHTML;
       btnSubmit.setAttribute("disabled", "true");
       btnSubmit.innerText = "Subiendo...";
-      
+
       try {
         const file = fileInput.files[0];
         const fileExt = file.name.split('.').pop();
         const fileName = `gallery_${Date.now()}.${fileExt}`;
-        
+
         // Usamos el mismo bucket 'logos' para ahorrar configuración en Supabase
         const { error: uploadError } = await supabase.storage
-          .from('logos') 
+          .from('logos')
           .upload(fileName, file, { cacheControl: '3600', upsert: true });
-          
+
         if (uploadError) throw uploadError;
-        
+
         const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
         galleryArray.unshift(urlData.publicUrl); // Insertamos al inicio de la matriz
-        
+
         await saveGallerySettings();
         formManageGallery.reset();
       } catch (err) {
@@ -901,7 +901,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (formManageHome) {
-    
+
     // --- Lógica de GPS ---
     const btnGetGps = document.getElementById("btn-get-gps");
     console.log("GPS Button found:", btnGetGps);
@@ -909,12 +909,12 @@ document.addEventListener("DOMContentLoaded", () => {
       btnGetGps.addEventListener("click", (e) => {
         e.preventDefault();
         alert("Botón GPS clickeado");
-        
+
         if (!navigator.geolocation) {
           alert("Tu navegador no soporta geolocalización o necesitas usar HTTPS.");
           return;
         }
-        
+
         btnGetGps.innerHTML = `<i data-lucide="loader" class="spin" style="width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> ...`;
         if (window.lucide) window.lucide.createIcons();
 
@@ -922,15 +922,15 @@ document.addEventListener("DOMContentLoaded", () => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const mapInput = document.getElementById("set-map_url");
-          
+
           if (mapInput) {
             // URL de embed de Google Maps con latitud y longitud
             mapInput.value = `https://maps.google.com/maps?q=${lat},${lng}&hl=es&z=16&output=embed`;
           }
-          
+
           btnGetGps.innerHTML = `<i data-lucide="check" style="stroke:#10B981; width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> OK`;
           if (window.lucide) window.lucide.createIcons();
-          
+
         }, (err) => {
           alert("No se pudo obtener la ubicación: Permiso denegado o error (" + err.message + ")");
           btnGetGps.innerHTML = `<i data-lucide="map-pin" style="width:18px; height:18px; display:inline-block; vertical-align:middle;"></i> Mi GPS`;
@@ -955,13 +955,13 @@ document.addEventListener("DOMContentLoaded", () => {
           const file = fileInput.files[0];
           const fileExt = file.name.split('.').pop();
           const fileName = `logo_${Date.now()}.${fileExt}`;
-          
+
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('logos')
             .upload(fileName, file, { cacheControl: '3600', upsert: true });
-            
+
           if (uploadError) throw new Error("Error subiendo imagen a la nube: " + uploadError.message);
-          
+
           // Obtener el enlace público de la imagen recién subida
           const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
           logoUrl = urlData.publicUrl;
@@ -971,7 +971,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const updates = ids.map(id => {
           return { id: id, value: document.getElementById(`set-${id}`).value.trim() };
         });
-        
+
         // Añadir el logo_url solo si subimos uno nuevo
         if (logoUrl) {
           updates.push({ id: "logo_url", value: logoUrl });
@@ -980,19 +980,19 @@ document.addEventListener("DOMContentLoaded", () => {
         btnSubmit.innerText = "Guardando configuración...";
         const { error } = await supabase.from("settings").upsert(updates);
         if (error) throw error;
-        
+
         alert("Textos e imagen guardados correctamente.");
-        
+
         // Actualizar la previsualización
         if (logoUrl) {
-           const previewImg = document.getElementById("logo-preview-img");
-           const previewText = document.getElementById("logo-preview-text");
-           if (previewImg && previewText) {
-             previewImg.src = logoUrl;
-             previewImg.style.display = "block";
-             previewText.style.display = "none";
-           }
-           fileInput.value = ""; // limpiar input
+          const previewImg = document.getElementById("logo-preview-img");
+          const previewText = document.getElementById("logo-preview-text");
+          if (previewImg && previewText) {
+            previewImg.src = logoUrl;
+            previewImg.style.display = "block";
+            previewText.style.display = "none";
+          }
+          fileInput.value = ""; // limpiar input
         }
       } catch (err) {
         alert("Error guardando configuración: " + err.message);
@@ -1222,14 +1222,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Calcular tasa de asistencia
       const totalFinalizadas = completadasCount + canceladasCount;
-      const attendancePercent = totalFinalizadas > 0 
-        ? Math.round((completadasCount / totalFinalizadas) * 100) 
+      const attendancePercent = totalFinalizadas > 0
+        ? Math.round((completadasCount / totalFinalizadas) * 100)
         : 0;
       statAttendance.innerText = `${attendancePercent}%`;
 
       // Renderizar tabla
       tableBody.innerHTML = "";
-      
+
       let grandTotalCompleted = 0;
       let grandTotalCancelled = 0;
       let grandTotalScheduled = 0;
@@ -1289,7 +1289,7 @@ document.addEventListener("DOMContentLoaded", () => {
           appointments.forEach(app => {
             const rowItem = document.createElement("div");
             rowItem.className = `appointment-list-item ${app.status}`;
-            
+
             const price = app.services ? parseFloat(app.services.price) : 0;
             const formattedPrice = Number(price).toLocaleString('es-CO');
             const serviceName = app.services ? app.services.name : "Servicio Desconocido";
